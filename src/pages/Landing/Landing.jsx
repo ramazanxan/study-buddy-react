@@ -6,18 +6,18 @@ import './Landing.css';
 const FLOAT_ITEMS = [
   { text: 'КГТУ',                  x: 8,  delay: 0    },
   { text: 'Enactus',               x: 22, delay: 3.1  },
-  { text: 'AIESEC',                x: 38, delay: 6.4  },
-  { text: 'IEEE',                  x: 55, delay: 1.7  },
+  { text: 'КЛ-3-25',               x: 38, delay: 6.4  },
+  { text: '✦ StudyBuddy',          x: 55, delay: 1.7  },
   { text: '✦ StudyBuddy',          x: 70, delay: 8.2  },
   { text: 'КГТУ им. Раззакова',    x: 85, delay: 4.5  },
   { text: 'Enactus KSTU',          x: 14, delay: 11.3 },
-  { text: 'IEEE Student Branch',   x: 30, delay: 7.0  },
-  { text: 'AIESEC KG',             x: 47, delay: 2.3  },
+  { text: 'КЛ — Комп. лингвистика', x: 30, delay: 7.0  },
+  { text: 'ИИТ КГТУ',              x: 47, delay: 2.3  },
   { text: '✦ StudyBuddy',          x: 63, delay: 9.8  },
   { text: 'КГТУ',                  x: 78, delay: 5.6  },
   { text: 'Enactus',               x: 92, delay: 13.1 },
-  { text: 'IEEE',                  x: 5,  delay: 14.4 },
-  { text: 'AIESEC',                x: 42, delay: 16.0 },
+  { text: 'ИИТ',                   x: 5,  delay: 14.4 },
+  { text: 'КЛ-3-25',               x: 42, delay: 16.0 },
   { text: 'КГТУ им. И. Раззакова', x: 60, delay: 12.5 },
   { text: '✦ StudyBuddy',          x: 18, delay: 17.3 },
 ];
@@ -285,8 +285,8 @@ export default function Landing() {
               </div>
               <div className="kstu-orgs">
                 <span className="kstu-org">Enactus KSTU</span>
-                <span className="kstu-org">IEEE Student Branch</span>
-                <span className="kstu-org">AIESEC KG</span>
+                <span className="kstu-org">ИИТ</span>
+                <span className="kstu-org">КЛ-3-25</span>
               </div>
             </div>
           </div>
