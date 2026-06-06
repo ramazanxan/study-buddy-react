@@ -182,18 +182,23 @@ export default function Landing() {
 
           <div className="hero-stats">
             <div className="hero-stat">
-              <div className="hero-stat-num">3 000+</div>
-              <div className="hero-stat-label">Студентов</div>
+              <div className="hero-stat-num">18 000+</div>
+              <div className="hero-stat-label">Студентов КГТУ</div>
             </div>
             <div className="hero-stat-divider" />
             <div className="hero-stat">
-              <div className="hero-stat-num">12</div>
-              <div className="hero-stat-label">Университетов</div>
+              <div className="hero-stat-num">10</div>
+              <div className="hero-stat-label">Институтов</div>
             </div>
             <div className="hero-stat-divider" />
             <div className="hero-stat">
-              <div className="hero-stat-num">850+</div>
-              <div className="hero-stat-label">Пактов заключено</div>
+              <div className="hero-stat-num">70+</div>
+              <div className="hero-stat-label">Специальностей</div>
+            </div>
+            <div className="hero-stat-divider" />
+            <div className="hero-stat">
+              <div className="hero-stat-num">1954</div>
+              <div className="hero-stat-label">Год основания</div>
             </div>
           </div>
         </div>

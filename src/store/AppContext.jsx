@@ -224,9 +224,8 @@ export function AppProvider({ children }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         dispatch({ type: 'SET_CURRENT_USER', user: buildSupabaseUser(session.user) });
-      } else {
-        dispatch({ type: 'SET_CURRENT_USER', user: null });
       }
+      // No else — don't wipe mock-store users when Supabase has no session
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -277,11 +276,7 @@ export function AppProvider({ children }) {
   }, [state.users]);
 
   const logout = useCallback(() => {
-    if (supabase) {
-      supabase.auth.signOut();
-      // SET_CURRENT_USER will be called by onAuthStateChange when session clears
-      return;
-    }
+    if (supabase) supabase.auth.signOut();
     if (state.currentUser) {
       dispatch({ type: 'UPDATE_USER', user: { ...state.currentUser, lastSeen: new Date().toISOString() } });
     }
