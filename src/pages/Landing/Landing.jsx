@@ -87,7 +87,6 @@ function KstuLogo3D({ size = 160, className = '' }) {
       <div className="kstu-logo-inner">
         <img src={KSTU_LOGO} alt="КГТУ логотип" className="kstu-logo-img" draggable={false} />
         <div className="kstu-shine" />
-        <div className="kstu-glow-ring" />
       </div>
     </div>
   );
@@ -133,6 +132,8 @@ export default function Landing() {
           <div className="hero-shape hs3" />
           <div className="hero-shape hs4" />
           <div className="hero-shape hs5" />
+          <div className="hero-shape hs6" />
+          <div className="hero-shape hs7" />
         </div>
 
         {/* Floating background labels */}
