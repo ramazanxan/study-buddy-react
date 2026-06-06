@@ -23,3 +23,8 @@ No test runner is configured yet.
 This is a minimal starter — the app lives almost entirely in `src/App.jsx`. There is no routing, no global state management, and no component hierarchy yet. As the study-buddy features get built out, components should be added under `src/` alongside `App.jsx`.
 
 Static assets imported by JS go in `src/assets/`; files that need to be served at a fixed public URL (e.g. `icons.svg` referenced via `<use href="/icons.svg#...">`) go in `public/`.
+
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan
+<!-- SPECKIT END -->
