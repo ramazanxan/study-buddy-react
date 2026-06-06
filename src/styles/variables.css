@@ -1,0 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700;900&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  --primary: #FF5F57;
+  --primary-dark: #E04840;
+  --primary-light: #FF8A84;
+  --secondary: #5B5EA6;
+  --secondary-dark: #474B8A;
+  --accent: #FFD166;
+  --spark: #FF9F1C;
+  --spark-light: #FFF0D4;
+  --bg: #FAFAF8;
+  --bg-card: #FFFFFF;
+  --bg-muted: #F3F3F8;
+  --text: #1C1C28;
+  --text-muted: #6B7080;
+  --text-light: #9BA3AF;
+  --border: #E8E8F0;
+  --border-focus: #FF5F57;
+  --success: #06D6A0;
+  --danger: #EF233C;
+  --warning: #FFD166;
+
+  --font-display: 'Unbounded', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  --radius-sm: 8px;
+  --radius: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow: 0 4px 16px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+  --shadow-primary: 0 8px 24px rgba(255,95,87,0.25);
+
+  --transition: 0.2s ease;
+  --transition-slow: 0.4s ease;
+
+  --navbar-h: 64px;
+  --sidebar-w: 280px;
+}

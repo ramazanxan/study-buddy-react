@@ -1,0 +1,22 @@
+.filter-panel {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 22px; position: sticky; top: calc(var(--navbar-h) + 20px); align-self: start;
+}
+.fp-section { margin-bottom: 20px; }
+.fp-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+.fp-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.fp-chips .chip { padding: 6px 13px; font-size: 13px; }
+.fp-age { display: flex; align-items: center; gap: 8px; }
+.fp-age .input { text-align: center; }
+.fp-toggle-row { display: flex; align-items: center; justify-content: space-between; }
+
+.filter-toggle { display: none; }
+
+@media (max-width: 860px) {
+  .filter-toggle {
+    display: block; width: 100%; background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px; font-weight: 600; margin-bottom: 12px;
+  }
+  .filter-panel { display: none; position: static; }
+  .filter-panel.open { display: block; }
+}

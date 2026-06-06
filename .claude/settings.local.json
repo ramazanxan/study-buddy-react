@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh repo *)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(npm --version)",
+      "Bash(npm i *)",
+      "Bash(omc --version)",
+      "Bash(omc --help)",
+      "PowerShell(npm run build)",
+      "mcp__Claude_Preview__preview_start",
+      "WebFetch(domain:kstu.kg)",
+      "WebSearch",
+      "WebFetch(domain:ru.sputnik.kg)",
+      "Bash(cd /c/Users/user/study-buddy-react/src && ls -R 2>/dev/null | head -80)",
+      "Bash(gh auth *)",
+      "PowerShell(gh auth status 2>&1)"
+    ]
+  }
+}

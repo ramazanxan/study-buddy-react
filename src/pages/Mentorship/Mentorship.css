@@ -1,0 +1,107 @@
+.mentor-container { max-width: 920px; }
+
+.mentor-hero { padding: 24px 0 8px; }
+.mentor-title { font-size: 28px; font-weight: 800; font-family: var(--font-display); margin: 0 0 6px; }
+.mentor-intro { margin-bottom: 22px; font-size: 15px; }
+
+.mentor-panel-link {
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.section-h { font-size: 16px; font-weight: 700; margin: 24px 0 14px; color: var(--text); }
+
+.active-mentor-card {
+  padding: 20px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: linear-gradient(135deg, #fff5f4, #fff);
+  border-color: var(--primary-light);
+}
+
+.active-mentor-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--primary);
+}
+
+.mentor-card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mentor-card-head > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.mentor-card-head strong { font-size: 15px; color: var(--text); }
+
+.mentor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+  margin-bottom: 32px;
+}
+
+.mentor-card { padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+
+.profile-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
+
+.mentor-bio {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.mentor-subjects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mentor-subject-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  background: rgba(91,94,166,0.08);
+  color: var(--secondary);
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.mentor-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.mentor-spots {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.mentor-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+.status-pill.active { background: #ecfdf5; color: #15803d; }

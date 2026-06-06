@@ -1,0 +1,39 @@
+.profile-container { max-width: 920px; }
+.profile-hero { padding: 36px 28px; text-align: center; display: flex; flex-direction: column; align-items: center; position: relative; margin-bottom: 24px; }
+.profile-spark {
+  position: absolute; top: 18px; right: 18px; background: linear-gradient(120deg, var(--spark), var(--accent));
+  color: #fff; font-weight: 700; font-size: 13px; padding: 5px 12px; border-radius: var(--radius-full);
+}
+.profile-name { font-size: 28px; margin-top: 14px; }
+.profile-login { color: var(--text-muted); margin-top: 2px; }
+.profile-badges { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 14px; }
+
+.match-banner {
+  margin-top: 16px; background: var(--spark-light); color: var(--primary-dark); font-weight: 700;
+  padding: 10px 20px; border-radius: var(--radius-full);
+}
+
+.profile-stats { display: flex; gap: 36px; margin: 24px 0; }
+.profile-stats .stat { display: flex; flex-direction: column; }
+.profile-stats .stat strong { font-family: var(--font-display); font-size: 26px; color: var(--primary); }
+.profile-stats .stat span { font-size: 13px; color: var(--text-muted); }
+
+.profile-pills { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 24px; }
+.info-pill { background: var(--bg-muted); padding: 8px 14px; border-radius: var(--radius-full); font-size: 14px; font-weight: 500; }
+
+.profile-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+.profile-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.profile-block { padding: 24px; }
+.profile-block h3 { font-size: 17px; margin-bottom: 12px; }
+.profile-block p { color: var(--text); line-height: 1.6; }
+.profile-interests { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag-interest.shared { background: var(--success); color: #fff; }
+
+.mini-pact { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.mini-pact:last-child { border-bottom: none; }
+
+@media (max-width: 680px) {
+  .profile-cols { grid-template-columns: 1fr; }
+  .profile-stats { gap: 24px; }
+}

@@ -1,0 +1,83 @@
+.wins-container { max-width: 980px; }
+
+.wins-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+  padding-top: 24px;
+}
+
+.wins-head h1 { font-size: 28px; font-family: var(--font-display); font-weight: 800; margin: 0 0 4px; }
+
+.wins-admin-badge {
+  font-size: 12px;
+  background: rgba(91,94,166,0.1);
+  color: var(--secondary);
+  padding: 6px 14px;
+  border-radius: 99px;
+  font-weight: 600;
+}
+
+.win-form { padding: 20px; margin-bottom: 22px; display: flex; flex-direction: column; gap: 12px; }
+.win-form-preview { max-height: 160px; border-radius: var(--radius); object-fit: cover; }
+.win-form-actions { display: flex; align-items: center; gap: 10px; }
+
+.wins-filter { display: flex; gap: 8px; margin-bottom: 22px; }
+
+.wins-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 18px;
+  padding-bottom: 40px;
+}
+
+.win-card { padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+
+.win-card-head { display: flex; align-items: center; gap: 10px; }
+.win-avatars { display: flex; gap: -4px; }
+.win-time { font-size: 12px; margin-top: 2px; }
+.win-card-text { font-size: 14px; color: var(--text); line-height: 1.5; margin: 0; }
+.win-card-photo { width: 100%; border-radius: var(--radius); object-fit: cover; max-height: 200px; }
+
+.win-card-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.win-react {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 99px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all var(--transition);
+  font-family: var(--font-body);
+  color: var(--text);
+}
+
+.win-react:hover:not(:disabled) { border-color: var(--primary); }
+.win-react.reacted { border-color: var(--primary); background: #fff0ef; color: var(--primary); }
+.win-react:disabled { cursor: default; }
+
+.win-admin-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  color: var(--text-muted);
+  border-radius: 6px;
+  transition: background var(--transition);
+  margin-left: auto;
+}
+
+.win-admin-remove:hover { background: #fff0f0; }

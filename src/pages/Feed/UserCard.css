@@ -1,0 +1,37 @@
+.user-card {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 24px 20px 18px; position: relative; transition: transform var(--transition), box-shadow var(--transition);
+  display: flex; flex-direction: column;
+}
+.user-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+
+.spark-badge {
+  position: absolute; top: 14px; right: 14px; background: linear-gradient(120deg, var(--spark), var(--accent));
+  color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: var(--radius-full);
+  box-shadow: 0 2px 8px rgba(255,159,28,0.4);
+}
+
+.uc-top { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; }
+.uc-name { font-size: 18px; cursor: pointer; transition: color var(--transition); }
+.uc-name:hover { color: var(--primary); }
+.uc-meta { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+
+.uc-goal { font-size: 14px; margin: 14px 0 12px; color: var(--text); min-height: 40px; }
+.uc-interests { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; min-height: 24px; }
+
+.uc-foot { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 14px; border-top: 1px solid var(--border); }
+.uc-rep { font-size: 14px; font-weight: 600; color: var(--text-muted); }
+
+.uc-like-btn {
+  width: 44px; height: 44px; border-radius: 50%; background: var(--bg-muted); font-size: 20px;
+  transition: transform var(--transition), background var(--transition);
+}
+.uc-like-btn:hover:not(:disabled) { transform: scale(1.12); background: var(--spark-light); }
+.uc-like-btn.liked { background: rgba(255,95,87,0.12); cursor: default; }
+
+.uc-msg-btn {
+  background: var(--secondary); color: #fff; padding: 9px 16px; border-radius: var(--radius-full);
+  font-weight: 600; font-size: 14px; box-shadow: 0 3px 0 var(--secondary-dark); transition: transform var(--transition);
+}
+.uc-msg-btn:hover { transform: translateY(-2px); }
+.uc-msg-btn:active { transform: translateY(1px); }

@@ -1,0 +1,96 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AppProvider, useApp } from './store/AppContext';
+import Navbar from './components/layout/Navbar';
+import Landing from './pages/Landing/Landing';
+import Login from './pages/Auth/Login';
+import Register from './pages/Auth/Register';
+import Feed from './pages/Feed/Feed';
+import Profile from './pages/Profile/Profile';
+import Chat from './pages/Chat/Chat';
+import Goals from './pages/Goals/Goals';
+import Mentorship from './pages/Mentorship/Mentorship';
+import MentorPanel from './pages/MentorPanel/MentorPanel';
+import WinsBoard from './pages/WinsBoard/WinsBoard';
+import Marketplace from './pages/Marketplace/Marketplace';
+import Announcements from './pages/Announcements/Announcements';
+import Complaints from './pages/Complaints/Complaints';
+import Admin from './pages/Admin/Admin';
+
+function ProtectedRoute({ children }) {
+  const { currentUser } = useApp();
+  return currentUser ? children : <Navigate to="/login" replace />;
+}
+
+function AdminRoute({ children }) {
+  const { currentUser } = useApp();
+  if (!currentUser) return <Navigate to="/login" replace />;
+  return currentUser.role === 'admin' ? children : <Navigate to="/feed" replace />;
+}
+
+function StudentOnlyRoute({ children }) {
+  const { currentUser } = useApp();
+  if (!currentUser) return <Navigate to="/login" replace />;
+  if (currentUser.role === 'admin') return <Navigate to="/admin" replace />;
+  return children;
+}
+
+function MentorRoute({ children }) {
+  const { currentUser } = useApp();
+  if (!currentUser) return <Navigate to="/login" replace />;
+  if (currentUser.role === 'admin') return <Navigate to="/admin" replace />;
+  const isMentor = currentUser.role === 'mentor' || currentUser.isMentor;
+  return isMentor ? children : <Navigate to="/feed" replace />;
+}
+
+function AppRoutes() {
+  const { currentUser } = useApp();
+
+  const defaultRoute = !currentUser
+    ? '/'
+    : currentUser.role === 'admin'
+      ? '/admin'
+      : '/feed';
+
+  return (
+    <>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={currentUser ? <Navigate to={defaultRoute} /> : <Landing />} />
+        <Route path="/login" element={!currentUser ? <Login /> : <Navigate to={defaultRoute} />} />
+        <Route path="/register" element={!currentUser ? <Register /> : <Navigate to={defaultRoute} />} />
+
+        {/* Protected routes for ALL authenticated users */}
+        <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
+        <Route path="/wins" element={<ProtectedRoute><WinsBoard /></ProtectedRoute>} />
+        <Route path="/marketplace" element={<ProtectedRoute><Marketplace /></ProtectedRoute>} />
+
+        {/* Student & Mentor only */}
+        <Route path="/profile" element={<StudentOnlyRoute><Profile /></StudentOnlyRoute>} />
+        <Route path="/profile/:id" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/chat" element={<StudentOnlyRoute><Chat /></StudentOnlyRoute>} />
+        <Route path="/goals" element={<StudentOnlyRoute><Goals /></StudentOnlyRoute>} />
+        <Route path="/mentorship" element={<StudentOnlyRoute><Mentorship /></StudentOnlyRoute>} />
+        <Route path="/announcements" element={<StudentOnlyRoute><Announcements /></StudentOnlyRoute>} />
+        <Route path="/complaints" element={<StudentOnlyRoute><Complaints /></StudentOnlyRoute>} />
+
+        {/* Mentor only */}
+        <Route path="/mentor-panel" element={<MentorRoute><MentorPanel /></MentorRoute>} />
+
+        {/* Admin only */}
+        <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
+
+        <Route path="*" element={<Navigate to={defaultRoute} replace />} />
+      </Routes>
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <AppProvider>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </AppProvider>
+  );
+}

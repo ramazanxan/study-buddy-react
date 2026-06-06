@@ -1,0 +1,23 @@
+.match-overlay {
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(28,28,40,0.6); backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.match-card {
+  background: linear-gradient(160deg, #fff, var(--spark-light));
+  border-radius: var(--radius-xl); padding: 40px 32px; text-align: center;
+  max-width: 440px; width: 100%; box-shadow: var(--shadow-lg);
+  animation: matchPop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+@keyframes matchPop { from { transform: scale(0.7) translateY(40px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+
+.match-heading { font-family: var(--font-display); font-size: 38px; font-weight: 900; color: var(--primary); }
+.match-sub { color: var(--text-muted); margin-top: 6px; }
+.match-avatars { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 28px 0 16px; }
+.match-ava { box-shadow: var(--shadow); border-radius: 50%; }
+.match-spark { font-size: 36px; color: var(--spark); animation: float 3s ease-in-out infinite; }
+.match-names { font-weight: 600; font-size: 18px; margin-bottom: 26px; }
+.match-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
