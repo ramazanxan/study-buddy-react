@@ -8,12 +8,42 @@ import './Marketplace.css';
 const CATEGORIES = ['Все', 'Книги', 'Электроника', 'Одежда', 'Услуги', 'Другое'];
 const CAT_EMOJI = { Книги: '📚', Электроника: '💻', Одежда: '👕', Услуги: '🛠️', Другое: '📦' };
 const CAT_COLOR = {
-  Книги: '#5B5EA6',
-  Электроника: '#3A86FF',
-  Одежда: '#FF5F57',
-  Услуги: '#06D6A0',
-  Другое: '#FF9F1C',
+  Книги: '#16A34A',
+  Электроника: '#0D9488',
+  Одежда: '#65A30D',
+  Услуги: '#0EA5E9',
+  Другое: '#84CC16',
 };
+
+// Infinite left→right moving strip of featured listings.
+function MarqueeStrip({ listings, onPick }) {
+  if (!listings.length) return null;
+  const loop = [...listings, ...listings]; // duplicate for seamless loop
+  return (
+    <div className="market-marquee" aria-hidden="false">
+      <div className="market-marquee-track">
+        {loop.map((l, i) => (
+          <button
+            key={l.id + '-' + i}
+            className="mq-card"
+            onClick={() => onPick(l)}
+            title={l.title}
+          >
+            <div className="mq-thumb" style={{ background: (CAT_COLOR[l.category] || '#16A34A') + '1A' }}>
+              {l.photos?.[0]
+                ? <img src={l.photos[0]} alt={l.title} />
+                : <span className="mq-emoji">{CAT_EMOJI[l.category] || '📦'}</span>}
+            </div>
+            <div className="mq-info">
+              <span className="mq-title">{l.title}</span>
+              <span className="mq-price">{Number(l.price).toLocaleString()} сом</span>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function PhotoUploader({ photos, onAdd, onRemove }) {
   const inputRef = useRef(null);
@@ -175,6 +205,9 @@ export default function Marketplace() {
           </div>
           <Button variant="primary" size="lg" onClick={openModal}>+ Разместить объявление</Button>
         </div>
+
+        {/* Moving featured strip */}
+        <MarqueeStrip listings={listings.slice(0, 12)} onPick={(l) => { setSearch(l.title); setCat('Все'); }} />
 
         {/* Filters */}
         <div className="market-toolbar">
