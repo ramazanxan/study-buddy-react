@@ -194,8 +194,19 @@ $$;
 
 grant execute on function public.get_email_by_login(text) to anon, authenticated;
 
--- ── Realtime ─────────────────────────────────────────────────────
+-- ── Realtime (безопасно при повторном запуске) ───────────────────
 
-alter publication supabase_realtime add table public.messages;
-alter publication supabase_realtime add table public.conversations;
-alter publication supabase_realtime add table public.announcements;
+do $$
+begin
+  begin
+    alter publication supabase_realtime add table public.messages;
+  exception when others then null; end;
+
+  begin
+    alter publication supabase_realtime add table public.conversations;
+  exception when others then null; end;
+
+  begin
+    alter publication supabase_realtime add table public.announcements;
+  exception when others then null; end;
+end $$;
