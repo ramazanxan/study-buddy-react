@@ -1,12 +1,97 @@
 import { Link } from 'react-router-dom';
+import { useRef, useEffect } from 'react';
 import useScrollReveal from '../../hooks/useScrollReveal';
 import './Landing.css';
 
 const FLOAT_ITEMS = [
-  'КГТУ', 'Enactus', 'AIESEC', 'IEEE', '✦ StudyBuddy', 'КГТУ', 'Enactus',
-  'AIESEC', 'IEEE Student Branch', 'КГТУ им. И. Раззакова', '✦ StudyBuddy',
-  'Enactus KSTU', 'КГТУ', 'AIESEC KG', 'IEEE', '✦ StudyBuddy', 'КГТУ',
+  { text: 'КГТУ',                  x: 8,  delay: 0    },
+  { text: 'Enactus',               x: 22, delay: 3.1  },
+  { text: 'AIESEC',                x: 38, delay: 6.4  },
+  { text: 'IEEE',                  x: 55, delay: 1.7  },
+  { text: '✦ StudyBuddy',          x: 70, delay: 8.2  },
+  { text: 'КГТУ им. Раззакова',    x: 85, delay: 4.5  },
+  { text: 'Enactus KSTU',          x: 14, delay: 11.3 },
+  { text: 'IEEE Student Branch',   x: 30, delay: 7.0  },
+  { text: 'AIESEC KG',             x: 47, delay: 2.3  },
+  { text: '✦ StudyBuddy',          x: 63, delay: 9.8  },
+  { text: 'КГТУ',                  x: 78, delay: 5.6  },
+  { text: 'Enactus',               x: 92, delay: 13.1 },
+  { text: 'IEEE',                  x: 5,  delay: 14.4 },
+  { text: 'AIESEC',                x: 42, delay: 16.0 },
+  { text: 'КГТУ им. И. Раззакова', x: 60, delay: 12.5 },
+  { text: '✦ StudyBuddy',          x: 18, delay: 17.3 },
 ];
+
+const KSTU_LOGO = 'https://enactus.kg/wp-content/uploads/2022/04/kgtu-logo.png';
+
+function KstuLogo3D({ size = 160, className = '' }) {
+  const ref = useRef(null);
+  const frameRef = useRef(null);
+  const stateRef = useRef({ rx: 0, ry: 0, hovering: false, idleT: 0 });
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const onMove = (e) => {
+      const rect = el.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dx = (e.clientX - cx) / (rect.width / 2);
+      const dy = (e.clientY - cy) / (rect.height / 2);
+      stateRef.current.rx = dy * -22;
+      stateRef.current.ry = dx * 22;
+      stateRef.current.hovering = true;
+
+      const shine = el.querySelector('.kstu-shine');
+      if (shine) {
+        shine.style.background = `radial-gradient(circle at ${(dx + 1) * 50}% ${(dy + 1) * 50}%, rgba(255,255,255,0.28) 0%, transparent 65%)`;
+      }
+    };
+
+    const onLeave = () => {
+      stateRef.current.hovering = false;
+    };
+
+    el.addEventListener('mousemove', onMove);
+    el.addEventListener('mouseleave', onLeave);
+
+    let last = 0;
+    const tick = (t) => {
+      const dt = t - last; last = t;
+      const s = stateRef.current;
+      if (!s.hovering) {
+        s.idleT += dt * 0.0006;
+        s.rx += (Math.sin(s.idleT * 0.7) * 10 - s.rx) * 0.04;
+        s.ry += (Math.sin(s.idleT) * 15 - s.ry) * 0.04;
+      } else {
+        s.idleT = 0;
+      }
+      const inner = el.querySelector('.kstu-logo-inner');
+      if (inner) {
+        inner.style.transform = `perspective(600px) rotateX(${s.rx}deg) rotateY(${s.ry}deg) scale3d(${s.hovering ? 1.08 : 1}, ${s.hovering ? 1.08 : 1}, 1)`;
+      }
+      frameRef.current = requestAnimationFrame(tick);
+    };
+    frameRef.current = requestAnimationFrame(tick);
+
+    return () => {
+      el.removeEventListener('mousemove', onMove);
+      el.removeEventListener('mouseleave', onLeave);
+      cancelAnimationFrame(frameRef.current);
+    };
+  }, []);
+
+  return (
+    <div ref={ref} className={`kstu-logo-3d ${className}`} style={{ width: size, height: size }}>
+      <div className="kstu-logo-inner">
+        <img src={KSTU_LOGO} alt="КГТУ логотип" className="kstu-logo-img" draggable={false} />
+        <div className="kstu-shine" />
+        <div className="kstu-glow-ring" />
+      </div>
+    </div>
+  );
+}
 
 const STEPS = [
   { n: 1, title: 'Создай профиль', text: 'Расскажи о себе, факультете и своей цели на учёбу.', icon: '📝' },
@@ -53,15 +138,27 @@ export default function Landing() {
         {/* Floating background labels */}
         <div className="hero-float-bg" aria-hidden="true">
           {FLOAT_ITEMS.map((item, i) => (
-            <span key={i} className="float-label" style={{ '--fi': i }}>{item}</span>
+            <span
+              key={i}
+              className="float-label"
+              style={{
+                '--fl-x': `${item.x}%`,
+                '--fl-delay': `${-item.delay}s`,
+                '--fl-dx': `${(i % 5 - 2) * 38}px`,
+                '--fl-rot': `${(i % 7 - 3) * 6}deg`,
+              }}
+            >{item.text}</span>
           ))}
         </div>
 
         <div className="hero-inner">
           <div className="hero-badge">
             <span className="hero-badge-dot" />
-            Платформа для студентов Кыргызстана
+            Только для студентов КГТУ им. И. Раззакова
           </div>
+
+          {/* KSTU 3D Logo */}
+          <KstuLogo3D size={110} className="hero-kstu-logo" />
 
           <div className="hero-logo">
             <span className="hero-spark">✦</span> StudyBuddy
@@ -73,8 +170,8 @@ export default function Landing() {
           </h1>
 
           <p className="hero-sub">
-            Находи напарников, наставников и единомышленников.
-            Ставьте цели вместе — и побеждайте.
+            Платформа для студентов КГТУ — находи напарников,
+            наставников и достигай целей вместе.
           </p>
 
           <div className="hero-cta">
@@ -175,27 +272,7 @@ export default function Landing() {
           <p className="section-sub reveal">StudyBuddy создан студентами КГТУ им. И. Раззакова</p>
           <div className="kstu-card reveal">
             <div className="kstu-emblem">
-              <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="kstu-svg">
-                {/* Shield */}
-                <path d="M60 8 L104 28 L104 68 Q104 95 60 112 Q16 95 16 68 L16 28 Z" fill="none" stroke="rgba(106,191,48,0.7)" strokeWidth="2"/>
-                {/* Tunduk (юрта) center circle */}
-                <circle cx="60" cy="60" r="22" fill="none" stroke="rgba(106,191,48,0.6)" strokeWidth="1.5"/>
-                {/* Tunduk rays */}
-                {[0,30,60,90,120,150,180,210,240,270,300,330].map((angle, i) => {
-                  const rad = angle * Math.PI / 180;
-                  return <line key={i}
-                    x1={60 + 10 * Math.cos(rad)} y1={60 + 10 * Math.sin(rad)}
-                    x2={60 + 22 * Math.cos(rad)} y2={60 + 22 * Math.sin(rad)}
-                    stroke="rgba(106,191,48,0.5)" strokeWidth="1.5"/>;
-                })}
-                {/* Inner dot */}
-                <circle cx="60" cy="60" r="6" fill="rgba(106,191,48,0.8)"/>
-                {/* Corner ornaments */}
-                <path d="M28 40 Q36 36 40 28" stroke="rgba(106,191,48,0.4)" strokeWidth="1.5" fill="none"/>
-                <path d="M92 40 Q84 36 80 28" stroke="rgba(106,191,48,0.4)" strokeWidth="1.5" fill="none"/>
-                <path d="M28 80 Q36 84 40 92" stroke="rgba(106,191,48,0.4)" strokeWidth="1.5" fill="none"/>
-                <path d="M92 80 Q84 84 80 92" stroke="rgba(106,191,48,0.4)" strokeWidth="1.5" fill="none"/>
-              </svg>
+              <KstuLogo3D size={120} />
             </div>
             <div className="kstu-info">
               <div className="kstu-name">КГТУ им. И. Раззакова</div>
@@ -218,10 +295,14 @@ export default function Landing() {
       {/* ── FOOTER ───────────────────────────────────────────── */}
       <footer className="landing-footer">
         <div className="container">
-          <div className="footer-logo">
-            <span className="nav-spark">✦</span> StudyBuddy
+          <div className="footer-left">
+            <KstuLogo3D size={56} className="footer-kstu-logo" />
+            <div>
+              <div className="footer-logo"><span className="nav-spark">✦</span> StudyBuddy</div>
+              <p className="text-muted">КГТУ им. И. Раззакова · Бишкек · 2026</p>
+            </div>
           </div>
-          <p className="text-muted">Сделано с ❤️ для студентов Кыргызстана · 2026</p>
+          <p className="text-muted footer-copy">Сделано студентами для студентов КГТУ ❤️</p>
         </div>
       </footer>
 
