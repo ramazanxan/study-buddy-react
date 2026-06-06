@@ -2,6 +2,12 @@ import { Link } from 'react-router-dom';
 import useScrollReveal from '../../hooks/useScrollReveal';
 import './Landing.css';
 
+const FLOAT_ITEMS = [
+  'КГТУ', 'Enactus', 'AIESEC', 'IEEE', '✦ StudyBuddy', 'КГТУ', 'Enactus',
+  'AIESEC', 'IEEE Student Branch', 'КГТУ им. И. Раззакова', '✦ StudyBuddy',
+  'Enactus KSTU', 'КГТУ', 'AIESEC KG', 'IEEE', '✦ StudyBuddy', 'КГТУ',
+];
+
 const STEPS = [
   { n: 1, title: 'Создай профиль', text: 'Расскажи о себе, факультете и своей цели на учёбу.', icon: '📝' },
   { n: 2, title: 'Найди Искру', text: 'Алгоритм подберёт студентов с общими интересами и целями.', icon: '✦' },
@@ -42,6 +48,13 @@ export default function Landing() {
           <div className="hero-shape hs3" />
           <div className="hero-shape hs4" />
           <div className="hero-shape hs5" />
+        </div>
+
+        {/* Floating background labels */}
+        <div className="hero-float-bg" aria-hidden="true">
+          {FLOAT_ITEMS.map((item, i) => (
+            <span key={i} className="float-label" style={{ '--fi': i }}>{item}</span>
+          ))}
         </div>
 
         <div className="hero-inner">
@@ -152,6 +165,53 @@ export default function Landing() {
           <h2>Готов найти своих?</h2>
           <p>Присоединяйся к тысячам студентов уже сегодня</p>
           <Link to="/register" className="btn btn-primary btn-lg">Создать профиль</Link>
+        </div>
+      </section>
+
+      {/* ── UNIVERSITY PARTNER ───────────────────────────────── */}
+      <section className="section partner-section">
+        <div className="container">
+          <h2 className="section-title reveal">Наш университет</h2>
+          <p className="section-sub reveal">StudyBuddy создан студентами КГТУ им. И. Раззакова</p>
+          <div className="kstu-card reveal">
+            <div className="kstu-emblem">
+              <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="kstu-svg">
+                {/* Shield */}
+                <path d="M60 8 L104 28 L104 68 Q104 95 60 112 Q16 95 16 68 L16 28 Z" fill="none" stroke="rgba(106,191,48,0.7)" strokeWidth="2"/>
+                {/* Tunduk (юрта) center circle */}
+                <circle cx="60" cy="60" r="22" fill="none" stroke="rgba(106,191,48,0.6)" strokeWidth="1.5"/>
+                {/* Tunduk rays */}
+                {[0,30,60,90,120,150,180,210,240,270,300,330].map((angle, i) => {
+                  const rad = angle * Math.PI / 180;
+                  return <line key={i}
+                    x1={60 + 10 * Math.cos(rad)} y1={60 + 10 * Math.sin(rad)}
+                    x2={60 + 22 * Math.cos(rad)} y2={60 + 22 * Math.sin(rad)}
+                    stroke="rgba(106,191,48,0.5)" strokeWidth="1.5"/>;
+                })}
+                {/* Inner dot */}
+                <circle cx="60" cy="60" r="6" fill="rgba(106,191,48,0.8)"/>
+                {/* Corner ornaments */}
+                <path d="M28 40 Q36 36 40 28" stroke="rgba(106,191,48,0.4)" strokeWidth="1.5" fill="none"/>
+                <path d="M92 40 Q84 36 80 28" stroke="rgba(106,191,48,0.4)" strokeWidth="1.5" fill="none"/>
+                <path d="M28 80 Q36 84 40 92" stroke="rgba(106,191,48,0.4)" strokeWidth="1.5" fill="none"/>
+                <path d="M92 80 Q84 84 80 92" stroke="rgba(106,191,48,0.4)" strokeWidth="1.5" fill="none"/>
+              </svg>
+            </div>
+            <div className="kstu-info">
+              <div className="kstu-name">КГТУ им. И. Раззакова</div>
+              <div className="kstu-full">Кыргызский государственный технический университет</div>
+              <div className="kstu-tags">
+                <span className="kstu-tag">🎓 Основан в 1954</span>
+                <span className="kstu-tag">🏛️ г. Бишкек</span>
+                <span className="kstu-tag">⚙️ Технический университет</span>
+              </div>
+              <div className="kstu-orgs">
+                <span className="kstu-org">Enactus KSTU</span>
+                <span className="kstu-org">IEEE Student Branch</span>
+                <span className="kstu-org">AIESEC KG</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

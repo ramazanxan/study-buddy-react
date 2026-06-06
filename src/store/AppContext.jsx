@@ -188,33 +188,42 @@ export function AppProvider({ children }) {
   }, []);
 
   // ── Supabase auth state sync ─────────────────────────────────
+  const buildSupabaseUser = (sbUser) => {
+    const meta = sbUser.user_metadata || {};
+    return {
+      id: sbUser.id,
+      login: meta.login || sbUser.email,
+      email: sbUser.email,
+      fullName: meta.full_name || '',
+      faculty: meta.faculty || '',
+      direction: meta.direction || '',
+      groupName: meta.group_name || '—',
+      course: meta.course || 1,
+      age: meta.age || 0,
+      about: meta.about || '',
+      role: meta.role || 'student',
+      isMentor: meta.is_mentor || false,
+      photo: meta.photo || null,
+      interests: meta.interests || [],
+      reputation: meta.reputation || 0,
+      badges: meta.badges || [],
+      isBanned: false,
+      createdAt: sbUser.created_at,
+      lastSeen: new Date().toISOString(),
+    };
+  };
+
   useEffect(() => {
     if (!supabase) return;
+
+    // Immediately restore session on page load (covers email-confirmation redirects)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) dispatch({ type: 'SET_CURRENT_USER', user: buildSupabaseUser(session.user) });
+    });
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        const meta = session.user.user_metadata || {};
-        const supabaseUser = {
-          id: session.user.id,
-          login: meta.login || session.user.email,
-          email: session.user.email,
-          fullName: meta.full_name || '',
-          faculty: meta.faculty || '',
-          direction: meta.direction || '',
-          groupName: meta.group_name || '—',
-          course: meta.course || 1,
-          age: meta.age || 0,
-          about: meta.about || '',
-          role: meta.role || 'student',
-          isMentor: meta.is_mentor || false,
-          photo: meta.photo || null,
-          interests: meta.interests || [],
-          reputation: meta.reputation || 0,
-          badges: meta.badges || [],
-          isBanned: false,
-          createdAt: session.user.created_at,
-          lastSeen: new Date().toISOString(),
-        };
-        dispatch({ type: 'SET_CURRENT_USER', user: supabaseUser });
+        dispatch({ type: 'SET_CURRENT_USER', user: buildSupabaseUser(session.user) });
       } else {
         dispatch({ type: 'SET_CURRENT_USER', user: null });
       }

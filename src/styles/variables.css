@@ -1,24 +1,25 @@
 @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700;900&family=Inter:wght@400;500;600&display=swap');
 
 :root {
-  --primary: #6ABF30;
-  --primary-dark: #55A020;
-  --primary-light: #99DA5C;
-  --secondary: #3BAD6E;
-  --secondary-dark: #2A8F56;
-  --accent: #C8F060;
-  --spark: #7DD83A;
-  --spark-light: #EEFAD4;
-  --bg: #FAFAF8;
+  /* Салатовый — свежий lime/светло-зелёный */
+  --primary: #5DBB2A;
+  --primary-dark: #489A1F;
+  --primary-light: #84D44E;
+  --secondary: #2DB37A;
+  --secondary-dark: #1F9260;
+  --accent: #B8ED44;
+  --spark: #8CD63B;
+  --spark-light: #EDFAD3;
+  --bg: #F7FAF5;
   --bg-card: #FFFFFF;
-  --bg-muted: #F3F3F8;
-  --text: #1C1C28;
-  --text-muted: #6B7080;
-  --text-light: #9BA3AF;
-  --border: #E8E8F0;
-  --border-focus: #6ABF30;
-  --success: #6ABF30;
-  --danger: #EF233C;
+  --bg-muted: #EFF6EA;
+  --text: #1A2214;
+  --text-muted: #5A6B52;
+  --text-light: #8FA882;
+  --border: #D6EAC8;
+  --border-focus: #5DBB2A;
+  --success: #5DBB2A;
+  --danger: #E53935;
   --warning: #F59E0B;
 
   --font-display: 'Unbounded', sans-serif;
@@ -33,7 +34,7 @@
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
   --shadow: 0 4px 16px rgba(0,0,0,0.08);
   --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
-  --shadow-primary: 0 8px 24px rgba(106,191,48,0.30);
+  --shadow-primary: 0 8px 24px rgba(93,187,42,0.30);
 
   --transition: 0.2s ease;
   --transition-slow: 0.4s ease;
@@ -48,12 +49,12 @@
   --lp-surface:    #0E4D30;
   --lp-glass:      rgba(255, 255, 255, 0.055);
   --lp-glass-border: rgba(255, 255, 255, 0.10);
-  --lp-violet:     #6ABF30;
-  --lp-violet-lt:  #99DA5C;
-  --lp-violet-glow: rgba(106, 191, 48, 0.42);
-  --lp-indigo:     #3BAD6E;
-  --lp-indigo-lt:  #6DD4A0;
-  --lp-pink:       #C8F060;
+  --lp-violet:     #5DBB2A;
+  --lp-violet-lt:  #84D44E;
+  --lp-violet-glow: rgba(93, 187, 42, 0.42);
+  --lp-indigo:     #2DB37A;
+  --lp-indigo-lt:  #5DD4A8;
+  --lp-pink:       #B8ED44;
   --lp-text:       #ECFDF5;
   --lp-muted:      rgba(209, 250, 229, 0.62);
   --lp-muted-lt:   rgba(209, 250, 229, 0.36);
@@ -64,9 +65,9 @@
 
 /* ── Dark theme: violet-tinted, compatible with the light layout ── */
 [data-theme='dark'] {
-  --bg:        #0D1F14;
-  --bg-card:   #162B1E;
-  --bg-muted:  #1E3D2A;
+  --bg:        #0E1A0A;
+  --bg-card:   #172410;
+  --bg-muted:  #1F3218;
   --text:      #ECFDF5;
   --text-muted: rgba(209, 250, 229, 0.66);
   --text-light: rgba(209, 250, 229, 0.42);

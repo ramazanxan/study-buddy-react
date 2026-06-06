@@ -109,26 +109,49 @@ export default function Navbar({ theme, onToggleTheme }) {
         <div className="nav-right" ref={dropRef}>
           {role !== 'admin' && (
             <div className="nav-notif-wrap" ref={notifRef}>
-              <button className="nav-theme-btn" onClick={openNotifs} title="Уведомления" aria-label="Уведомления">
+              <button className="nav-notif-bell" onClick={openNotifs} aria-label="Уведомления">
                 🔔
-                {newNotifCount > 0 && <span className="nav-badge nav-notif-dot">{newNotifCount}</span>}
+                {newNotifCount > 0 && <span className="nav-notif-dot">{newNotifCount}</span>}
               </button>
               {notifOpen && (
                 <div className="nav-dropdown nav-notif-drop">
-                  <div className="nav-drop-head"><strong>Уведомления</strong></div>
+                  <div className="nav-notif-drop-head">
+                    <strong>Уведомления</strong>
+                    {notifList.length > 0 && (
+                      <span className="nav-notif-count">{notifList.length}</span>
+                    )}
+                  </div>
                   {notifList.length === 0 ? (
-                    <div className="nav-notif-empty">Пока нет уведомлений</div>
+                    <div className="nav-notif-empty">
+                      <span className="nav-notif-empty-icon">🔕</span>
+                      Пока нет уведомлений
+                    </div>
                   ) : (
-                    notifList.map((a) => (
-                      <button
-                        key={a.id}
-                        className="nav-notif-item"
-                        onClick={() => { setNotifOpen(false); navigate('/announcements'); }}
-                      >
-                        <span className="nav-notif-title">{a.title || a.text?.slice(0, 60)}</span>
-                        {a.title && <span className="nav-notif-text">{a.text?.slice(0, 70)}</span>}
-                      </button>
-                    ))
+                    <>
+                      {notifList.map((a) => {
+                        const isNew = new Date(a.createdAt || a.date).getTime() > seenAt - 1000;
+                        const icon = a.level === 'urgent' ? '🚨' : a.level === 'important' ? '⚠️' : '📢';
+                        return (
+                          <button
+                            key={a.id}
+                            className={`nav-notif-item ${isNew ? 'unread' : ''}`}
+                            onClick={() => { setNotifOpen(false); navigate('/announcements'); }}
+                          >
+                            <div className={`nav-notif-icon ${a.level || 'normal'}`}>{icon}</div>
+                            <div className="nav-notif-body">
+                              <div className="nav-notif-title">{a.title || a.text?.slice(0, 50)}</div>
+                              {a.text && <div className="nav-notif-text">{a.text?.slice(0, 90)}</div>}
+                            </div>
+                            {isNew && <span className="nav-notif-unread-dot" />}
+                          </button>
+                        );
+                      })}
+                      <div className="nav-notif-footer">
+                        <button className="nav-notif-all-btn" onClick={() => { setNotifOpen(false); navigate('/announcements'); }}>
+                          Все объявления →
+                        </button>
+                      </div>
+                    </>
                   )}
                 </div>
               )}

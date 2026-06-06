@@ -27,17 +27,14 @@ export default function Login() {
       if (supabase) {
         let email = form.identifier.trim().toLowerCase();
 
-        // If it's a login (no @), look up the email via RPC
+        // If it's a login (no @), try RPC lookup, fall back to treating as email
         if (!isEmail(email)) {
           const { data: foundEmail, error: rpcErr } = await supabase
             .rpc('get_email_by_login', { p_login: email });
-
-          if (rpcErr || !foundEmail) {
-            setError('Пользователь не найден');
-            setLoading(false);
-            return;
+          if (!rpcErr && foundEmail) {
+            email = foundEmail;
           }
-          email = foundEmail;
+          // If RPC failed/not found — leave email as-is and let signInWithPassword fail gracefully
         }
 
         const { data, error: authErr } = await supabase.auth.signInWithPassword({
