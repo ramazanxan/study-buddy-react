@@ -46,7 +46,7 @@
   padding: 7px 16px;
   border-radius: 99px;
   border: 1.5px solid var(--border);
-  background: #fff;
+  background: var(--bg-card);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -67,7 +67,7 @@
 
 /* Card */
 .ann-card {
-  background: #fff;
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-left: 4px solid var(--border);
   border-radius: var(--radius-lg);
@@ -83,8 +83,8 @@
   padding: 22px 24px;
 }
 
-.ann-urgent  { border-left-color: var(--danger); background: #fff8f8; }
-.ann-important { border-left-color: var(--warning); background: #fffdf0; }
+.ann-urgent  { border-left-color: var(--danger); background: color-mix(in srgb, var(--danger) 7%, var(--bg-card)); }
+.ann-important { border-left-color: var(--warning); background: color-mix(in srgb, var(--warning) 8%, var(--bg-card)); }
 .ann-normal  { border-left-color: var(--secondary); }
 
 .ann-card-head {
@@ -114,9 +114,9 @@
   letter-spacing: 0.3px;
 }
 
-.ann-level-badge.urgent { background: #fde8e8; color: var(--danger); }
-.ann-level-badge.important { background: #fef9e0; color: #b45309; }
-.ann-level-badge.normal { background: rgba(91,94,166,0.1); color: var(--secondary); }
+.ann-level-badge.urgent { background: color-mix(in srgb, var(--danger) 15%, var(--bg-card)); color: var(--danger); }
+.ann-level-badge.important { background: color-mix(in srgb, var(--warning) 18%, var(--bg-card)); color: var(--warning); }
+.ann-level-badge.normal { background: color-mix(in srgb, var(--secondary) 14%, var(--bg-card)); color: var(--secondary); }
 
 .ann-date { font-size: 12px; color: var(--text-muted); }
 .ann-views { font-size: 12px; color: var(--text-muted); }

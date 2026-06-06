@@ -14,8 +14,14 @@ export default function Profile() {
   const navigate = useNavigate();
   const {
     currentUser, getUser, matches, goals, pacts,
-    likeUser, hasLiked, isMatched, getMatchId, wantTooGoal, toggleMentor,
+    likeUser, hasLiked, isMatched, wantTooGoal, toggleMentor,
+    getOrCreateConversation,
   } = useApp();
+
+  const messageUser = () => {
+    const conv = getOrCreateConversation(user.id);
+    navigate('/chat', { state: { convId: conv?.id } });
+  };
 
   const [editing, setEditing] = useState(false);
   const [match, setMatch] = useState(null);
@@ -84,11 +90,10 @@ export default function Profile() {
               </>
             ) : (
               <>
-                {matched ? (
-                  <Button variant="primary" icon="💬" onClick={() => navigate('/chat', { state: { matchId: getMatchId(user.id) } })}>Написать</Button>
-                ) : (
-                  <Button variant="primary" icon={liked ? '✅' : '❤️'} onClick={handleLike} disabled={liked}>
-                    {liked ? 'Вы уже лайкнули' : 'Лайк'}
+                <Button variant="primary" icon="💬" onClick={messageUser}>Написать</Button>
+                {!matched && (
+                  <Button variant={liked ? 'ghost' : 'secondary'} icon={liked ? '✅' : '❤️'} onClick={handleLike} disabled={liked}>
+                    {liked ? 'Вы лайкнули' : 'Лайк'}
                   </Button>
                 )}
               </>

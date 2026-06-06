@@ -48,8 +48,8 @@ export const getInitials = (name = '') => {
 };
 
 const AVATAR_COLORS = [
-  '#FF5F57', '#5B5EA6', '#FF9F1C', '#06D6A0', '#EF233C',
-  '#FFD166', '#8338EC', '#3A86FF', '#FB5607', '#118AB2',
+  '#16A34A', '#0D9488', '#15803D', '#0EA5E9', '#65A30D',
+  '#059669', '#0891B2', '#84CC16', '#10B981', '#14B8A6',
 ];
 
 export const getAvatarColor = (id = '') => {

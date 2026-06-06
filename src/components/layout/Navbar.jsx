@@ -29,18 +29,38 @@ const ADMIN_LINKS = [
   { to: '/admin', label: 'Панель',  icon: '⚡' },
 ];
 
+const NOTIF_SEEN_KEY = 'studybuddy_notif_seen';
+
 export default function Navbar({ theme, onToggleTheme }) {
-  const { currentUser, logout, unreadCount } = useApp();
+  const { currentUser, logout, unreadCount, announcements } = useApp();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropOpen, setDropOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [seenAt, setSeenAt] = useState(() => Number(localStorage.getItem(NOTIF_SEEN_KEY) || 0));
   const dropRef = useRef(null);
+  const notifRef = useRef(null);
 
   const unread = currentUser ? unreadCount() : 0;
+
+  const notifList = [...(announcements || [])]
+    .sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
+    .slice(0, 8);
+  const newNotifCount = notifList.filter(
+    (a) => new Date(a.createdAt || a.date).getTime() > seenAt
+  ).length;
+
+  const openNotifs = () => {
+    setNotifOpen((o) => !o);
+    const now = Date.now();
+    setSeenAt(now);
+    localStorage.setItem(NOTIF_SEEN_KEY, String(now));
+  };
 
   useEffect(() => {
     const onClick = (e) => {
       if (dropRef.current && !dropRef.current.contains(e.target)) setDropOpen(false);
+      if (notifRef.current && !notifRef.current.contains(e.target)) setNotifOpen(false);
     };
     document.addEventListener('mousedown', onClick);
     return () => document.removeEventListener('mousedown', onClick);
@@ -81,6 +101,33 @@ export default function Navbar({ theme, onToggleTheme }) {
         </div>
 
         <div className="nav-right" ref={dropRef}>
+          {role !== 'admin' && (
+            <div className="nav-notif-wrap" ref={notifRef}>
+              <button className="nav-theme-btn" onClick={openNotifs} title="Уведомления" aria-label="Уведомления">
+                🔔
+                {newNotifCount > 0 && <span className="nav-badge nav-notif-dot">{newNotifCount}</span>}
+              </button>
+              {notifOpen && (
+                <div className="nav-dropdown nav-notif-drop">
+                  <div className="nav-drop-head"><strong>Уведомления</strong></div>
+                  {notifList.length === 0 ? (
+                    <div className="nav-notif-empty">Пока нет уведомлений</div>
+                  ) : (
+                    notifList.map((a) => (
+                      <button
+                        key={a.id}
+                        className="nav-notif-item"
+                        onClick={() => { setNotifOpen(false); navigate('/announcements'); }}
+                      >
+                        <span className="nav-notif-title">{a.title || a.text?.slice(0, 60)}</span>
+                        {a.title && <span className="nav-notif-text">{a.text?.slice(0, 70)}</span>}
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          )}
           <button
             className="nav-theme-btn"
             onClick={onToggleTheme}
