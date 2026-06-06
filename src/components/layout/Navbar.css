@@ -3,7 +3,7 @@
   top: 0; left: 0; right: 0;
   height: var(--navbar-h);
   z-index: 800;
-  background: rgba(255,255,255,0.95);
+  background: color-mix(in srgb, var(--bg-card) 92%, transparent);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
@@ -75,7 +75,7 @@
 }
 
 .nav-link:hover { background: var(--bg-muted); color: var(--text); }
-.nav-link.active { background: #fff0ef; color: var(--primary); font-weight: 600; }
+.nav-link.active { background: color-mix(in srgb, var(--primary) 12%, transparent); color: var(--primary); font-weight: 600; }
 
 .nav-icon { font-size: 14px; line-height: 1; }
 .nav-label { font-size: 13px; }
@@ -118,7 +118,22 @@
   text-decoration: none;
 }
 
-.nav-complaint-btn:hover { background: #fff0ef; }
+.nav-complaint-btn:hover { background: color-mix(in srgb, var(--primary) 12%, transparent); }
+
+.nav-theme-btn {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: var(--bg-muted);
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition), transform var(--transition);
+}
+
+.nav-theme-btn:hover { transform: scale(1.1); }
 
 .nav-avatar-btn {
   background: none;
@@ -135,7 +150,7 @@
   position: absolute;
   top: calc(100% + 10px); right: 0;
   min-width: 210px;
-  background: #fff;
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);

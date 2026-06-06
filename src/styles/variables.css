@@ -58,4 +58,24 @@
   --lp-muted:      rgba(209, 205, 255, 0.60);
   --lp-muted-lt:   rgba(209, 205, 255, 0.35);
   --lp-border:     rgba(255, 255, 255, 0.08);
+
+  color-scheme: light;
+}
+
+/* ── Dark theme: violet-tinted, compatible with the light layout ── */
+[data-theme='dark'] {
+  --bg:        #0C0820;
+  --bg-card:   #171232;
+  --bg-muted:  #211A45;
+  --text:      #F1F0FF;
+  --text-muted: rgba(209, 205, 255, 0.66);
+  --text-light: rgba(209, 205, 255, 0.42);
+  --border:    rgba(255, 255, 255, 0.10);
+  --border-focus: var(--lp-violet-lt);
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.45);
+  --shadow:    0 4px 16px rgba(0,0,0,0.45);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.55);
+
+  color-scheme: dark;
 }

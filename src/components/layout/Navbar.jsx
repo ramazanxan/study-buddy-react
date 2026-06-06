@@ -29,7 +29,7 @@ const ADMIN_LINKS = [
   { to: '/admin', label: 'Панель',  icon: '⚡' },
 ];
 
-export default function Navbar() {
+export default function Navbar({ theme, onToggleTheme }) {
   const { currentUser, logout, unreadCount } = useApp();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -81,6 +81,14 @@ export default function Navbar() {
         </div>
 
         <div className="nav-right" ref={dropRef}>
+          <button
+            className="nav-theme-btn"
+            onClick={onToggleTheme}
+            title={theme === 'dark' ? 'Светлая тема' : 'Тёмная тема'}
+            aria-label="Переключить тему"
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
           {role !== 'admin' && (
             <NavLink to="/complaints" className="nav-complaint-btn" title="Пожаловаться" onClick={() => setMenuOpen(false)}>
               🚩

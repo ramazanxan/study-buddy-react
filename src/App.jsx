@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider, useApp } from './store/AppContext';
+import { useTheme } from './hooks/useTheme';
 import Navbar from './components/layout/Navbar';
 import Landing from './pages/Landing/Landing';
 import Login from './pages/Auth/Login';
@@ -44,6 +45,7 @@ function MentorRoute({ children }) {
 
 function AppRoutes() {
   const { currentUser } = useApp();
+  const { theme, toggle } = useTheme();
 
   const defaultRoute = !currentUser
     ? '/'
@@ -53,7 +55,7 @@ function AppRoutes() {
 
   return (
     <>
-      <Navbar />
+      <Navbar theme={theme} onToggleTheme={toggle} />
       <Routes>
         <Route path="/" element={currentUser ? <Navigate to={defaultRoute} /> : <Landing />} />
         <Route path="/login" element={!currentUser ? <Login /> : <Navigate to={defaultRoute} />} />
