@@ -63,16 +63,19 @@
   color-scheme: light;
 }
 
-/* ── Dark theme: violet-tinted, compatible with the light layout ── */
+/* ── Dark theme ── */
 [data-theme='dark'] {
-  --bg:        #0E1A0A;
-  --bg-card:   #172410;
-  --bg-muted:  #1F3218;
-  --text:      #ECFDF5;
-  --text-muted: rgba(209, 250, 229, 0.66);
-  --text-light: rgba(209, 250, 229, 0.42);
-  --border:    rgba(255, 255, 255, 0.10);
-  --border-focus: var(--lp-violet-lt);
+  --primary:       #7ED338;
+  --primary-dark:  #62AD28;
+  --primary-light: #A8E860;
+  --bg:        #141F0E;
+  --bg-card:   #1E2F16;
+  --bg-muted:  #283F1E;
+  --text:      #F0FDE4;
+  --text-muted: rgba(220, 252, 180, 0.72);
+  --text-light: rgba(220, 252, 180, 0.45);
+  --border:    rgba(126, 211, 56, 0.18);
+  --border-focus: #7ED338;
 
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.45);
   --shadow:    0 4px 16px rgba(0,0,0,0.45);

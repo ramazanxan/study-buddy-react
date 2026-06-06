@@ -2,76 +2,29 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../../store/AppContext';
 import Button from '../../components/common/Button';
-import { supabase } from '../../lib/supabase';
 import './Auth.css';
 
 export default function Login() {
   const { login } = useApp();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ identifier: '', password: '' });
+  const [form, setForm] = useState({ login: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const isEmail = (v) => v.includes('@');
-
-  const submit = async (e) => {
+  const submit = (e) => {
     e.preventDefault();
     setError('');
-    if (!form.identifier.trim() || !form.password) {
+    if (!form.login.trim() || !form.password) {
       setError('Заполните все поля');
       return;
     }
     setLoading(true);
-
-    try {
-      if (supabase) {
-        let email = form.identifier.trim().toLowerCase();
-
-        // Supabase requires email — if user typed a username, tell them
-        if (!isEmail(email)) {
-          const { data: foundEmail, error: rpcErr } = await supabase
-            .rpc('get_email_by_login', { p_login: email });
-          if (!rpcErr && foundEmail) {
-            email = foundEmail;
-          } else {
-            setError('Введи email-адрес, с которым регистрировался(ась)');
-            setLoading(false);
-            return;
-          }
-        }
-
-        const { data, error: authErr } = await supabase.auth.signInWithPassword({
-          email,
-          password: form.password,
-        });
-
-        if (authErr) {
-          if (authErr.message.includes('Email not confirmed')) {
-            setError('Email не подтверждён. Проверь почту и нажми на ссылку в письме.');
-          } else if (authErr.message.includes('Invalid login credentials')) {
-            setError('Неверный логин/email или пароль');
-          } else {
-            setError(authErr.message);
-          }
-          setLoading(false);
-          return;
-        }
-
-        // Supabase auth OK — AppContext подхватит сессию через onAuthStateChange
-        navigate('/feed');
-        return;
-      }
-
-      // ── Fallback: local mock store ──
-      const res = login(form.identifier.trim(), form.password);
+    setTimeout(() => {
+      const res = login(form.login.trim(), form.password);
       setLoading(false);
       if (res.error) setError(res.error);
       else navigate('/feed');
-
-    } catch (err) {
-      setError('Ошибка соединения. Попробуйте ещё раз.');
-      setLoading(false);
-    }
+    }, 300);
   };
 
   return (
@@ -84,14 +37,14 @@ export default function Login() {
         {error && <div className="auth-error">{error}</div>}
 
         <div className="field">
-          <label>Логин или Email</label>
+          <label>Логин</label>
           <input
             className="input"
-            value={form.identifier}
+            value={form.login}
             autoFocus
             autoComplete="username"
-            onChange={(e) => setForm({ ...form, identifier: e.target.value })}
-            placeholder="aizada_k или example@gmail.com"
+            onChange={(e) => setForm({ ...form, login: e.target.value })}
+            placeholder="aizada_k"
           />
         </div>
         <div className="field">

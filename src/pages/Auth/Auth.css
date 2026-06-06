@@ -13,6 +13,11 @@
 .auth-logo { font-family: var(--font-display); font-weight: 900; font-size: 24px; text-align: center; display: block; margin-bottom: 8px; }
 .auth-title { text-align: center; font-size: 26px; margin-bottom: 6px; }
 .auth-subtitle { text-align: center; color: var(--text-muted); margin-bottom: 28px; }
+.auth-notice {
+  background: rgba(93,187,42,0.12); color: var(--primary); padding: 11px 14px; border-radius: var(--radius);
+  font-size: 14px; font-weight: 600; margin-bottom: 18px; text-align: center;
+  border: 1px solid rgba(93,187,42,0.25);
+}
 .auth-error {
   background: rgba(239,35,60,0.1); color: var(--danger); padding: 11px 14px; border-radius: var(--radius);
   font-size: 14px; font-weight: 500; margin-bottom: 18px; text-align: center;

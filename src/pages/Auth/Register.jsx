@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../../store/AppContext';
 import { KGTU_FACULTIES } from '../../store/mockData';
 import Button from '../../components/common/Button';
-import { supabase } from '../../lib/supabase';
 import {
   validateLogin, validatePassword, validateName, validateAge,
   getPasswordStrength, passwordCriteria,
@@ -14,52 +13,17 @@ const CRITERIA_LABELS = [
   ['length', '8+ символов'], ['upper', 'Заглавная'], ['lower', 'Строчная'], ['digit', 'Цифра'],
 ];
 
-function validateEmail(v) {
-  if (!v || !v.trim()) return 'Введите email';
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())) return 'Некорректный email';
-  return '';
-}
-
-// Screen shown after successful signup — waiting for email confirmation.
-function ConfirmScreen({ email }) {
-  return (
-    <div className="auth-wrap">
-      <div className="auth-card" style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: 56, marginBottom: 16 }}>📬</div>
-        <h2 className="auth-title">Проверь почту!</h2>
-        <p className="auth-subtitle" style={{ marginBottom: 12 }}>
-          Мы отправили письмо на
-        </p>
-        <p style={{ fontWeight: 700, fontSize: 17, color: 'var(--primary)', marginBottom: 20 }}>{email}</p>
-        <p style={{ color: 'var(--text-muted)', fontSize: 14, lineHeight: 1.6 }}>
-          Нажми на кнопку в письме, чтобы подтвердить аккаунт.<br />
-          После подтверждения можешь войти.
-        </p>
-        <div style={{ marginTop: 24 }}>
-          <Link to="/login">
-            <Button variant="primary" className="btn-block">Перейти ко входу</Button>
-          </Link>
-        </div>
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 16 }}>
-          Письмо не пришло? Проверь папку «Спам».
-        </p>
-      </div>
-    </div>
-  );
-}
-
 export default function Register() {
   const { register } = useApp();
   const navigate = useNavigate();
   const [role, setRole] = useState('student');
   const [form, setForm] = useState({
-    login: '', email: '', fullName: '', age: '', password: '', confirm: '',
+    login: '', fullName: '', age: '', password: '', confirm: '',
     faculty: KGTU_FACULTIES[0].id, direction: KGTU_FACULTIES[0].directions[0], course: 1, about: '',
   });
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [confirming, setConfirming] = useState(false); // waiting for email confirm
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -74,7 +38,6 @@ export default function Register() {
   const validate = () => {
     const e = {};
     e.login    = validateLogin(form.login);
-    e.email    = validateEmail(form.email);
     e.fullName = validateName(form.fullName);
     e.age      = validateAge(form.age);
     e.password = validatePassword(form.password);
@@ -84,51 +47,12 @@ export default function Register() {
     return Object.keys(e).length === 0;
   };
 
-  const submit = async (ev) => {
+  const submit = (ev) => {
     ev.preventDefault();
     setServerError('');
     if (!validate()) return;
     setLoading(true);
-
-    try {
-      if (supabase) {
-        // ── Supabase path: real email confirmation ──
-        const { data, error } = await supabase.auth.signUp({
-          email: form.email.trim().toLowerCase(),
-          password: form.password,
-          options: {
-            data: {
-              login:      form.login,
-              full_name:  form.fullName,
-              faculty:    form.faculty,
-              direction:  form.direction || currentFaculty.directions[0],
-              group_name: form.groupName || '—',
-              course:     Number(form.course) || 1,
-              age:        Number(form.age),
-              about:      form.about || '',
-              role:       role === 'mentor' ? 'mentor' : 'student',
-              is_mentor:  role === 'mentor',
-            },
-          },
-        });
-
-        if (error) {
-          if (error.message.includes('already registered') || error.message.includes('already exists')) {
-            setServerError('Этот email уже зарегистрирован. Попробуй войти.');
-          } else {
-            setServerError(error.message);
-          }
-          setLoading(false);
-          return;
-        }
-
-        // Supabase returns user but unconfirmed — show check-email screen.
-        setLoading(false);
-        setConfirming(true);
-        return;
-      }
-
-      // ── Fallback: local mock store (no Supabase) ──
+    setTimeout(() => {
       const data = {
         ...form,
         direction: form.direction || currentFaculty.directions[0],
@@ -138,14 +62,8 @@ export default function Register() {
       setLoading(false);
       if (res.error) setServerError(res.error);
       else navigate('/feed');
-
-    } catch (err) {
-      setServerError('Ошибка соединения. Попробуйте ещё раз.');
-      setLoading(false);
-    }
+    }, 350);
   };
-
-  if (confirming) return <ConfirmScreen email={form.email} />;
 
   return (
     <div className="auth-wrap">
@@ -181,20 +99,6 @@ export default function Register() {
                 onChange={(e) => set('login', e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))}
                 placeholder="latin_only" autoComplete="username" />
               {errors.login && <div className="field-error">{errors.login}</div>}
-            </div>
-
-            <div className="field">
-              <label>Email (Gmail)</label>
-              <input
-                className={`input ${errors.email ? 'has-error' : ''}`}
-                type="email"
-                value={form.email}
-                onChange={(e) => set('email', e.target.value)}
-                placeholder="example@gmail.com"
-                autoComplete="email"
-              />
-              {errors.email && <div className="field-error">{errors.email}</div>}
-              <div className="field-hint">На этот адрес придёт письмо для подтверждения аккаунта</div>
             </div>
 
             <div className="field">
