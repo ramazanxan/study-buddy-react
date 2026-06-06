@@ -40,4 +40,22 @@
 
   --navbar-h: 64px;
   --sidebar-w: 280px;
+
+  /* ── Landing violet palette (scoped to .landing) ── */
+  --lp-void:       #07041A;
+  --lp-deep:       #0E0930;
+  --lp-mid:        #1A1150;
+  --lp-surface:    #1F1660;
+  --lp-glass:      rgba(255, 255, 255, 0.055);
+  --lp-glass-border: rgba(255, 255, 255, 0.10);
+  --lp-violet:     #7C3AED;
+  --lp-violet-lt:  #A78BFA;
+  --lp-violet-glow: rgba(124, 58, 237, 0.45);
+  --lp-indigo:     #4338CA;
+  --lp-indigo-lt:  #818CF8;
+  --lp-pink:       #EC4899;
+  --lp-text:       #F1F0FF;
+  --lp-muted:      rgba(209, 205, 255, 0.60);
+  --lp-muted-lt:   rgba(209, 205, 255, 0.35);
+  --lp-border:     rgba(255, 255, 255, 0.08);
 }

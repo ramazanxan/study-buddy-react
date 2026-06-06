@@ -1,0 +1,124 @@
+-- StudyBuddy — Supabase schema (PostgreSQL)
+-- Run this in your Supabase project: SQL Editor → New query → paste → Run.
+-- Covers the core needed for real cross-user accounts, realtime chat and announcements.
+-- We can add the rest (goals, pacts, wins, listings, mentorships, complaints) in a follow-up migration.
+
+-- ── Profiles (extends Supabase Auth users) ──────────────────────────
+create table if not exists public.profiles (
+  id          uuid primary key references auth.users(id) on delete cascade,
+  login       text unique not null,
+  full_name   text not null,
+  faculty     text,
+  direction   text,
+  group_name  text,
+  course      int default 1,
+  age         int,
+  photo       text,
+  interests   text[] default '{}',
+  about       text default '',
+  goal        text default '',
+  role        text default 'student' check (role in ('student','mentor','admin')),
+  is_mentor   boolean default false,
+  reputation  int default 0,
+  badges      text[] default '{}',
+  is_banned   boolean default false,
+  last_seen   timestamptz default now(),
+  created_at  timestamptz default now()
+);
+
+-- ── Likes & matches ────────────────────────────────────────────────
+create table if not exists public.likes (
+  id        uuid primary key default gen_random_uuid(),
+  from_id   uuid references public.profiles(id) on delete cascade,
+  to_id     uuid references public.profiles(id) on delete cascade,
+  created_at timestamptz default now(),
+  unique (from_id, to_id)
+);
+
+create table if not exists public.matches (
+  id        uuid primary key default gen_random_uuid(),
+  user_a    uuid references public.profiles(id) on delete cascade,
+  user_b    uuid references public.profiles(id) on delete cascade,
+  created_at timestamptz default now()
+);
+
+-- ── Conversations & messages (realtime chat) ───────────────────────
+create table if not exists public.conversations (
+  id          uuid primary key default gen_random_uuid(),
+  participant_a uuid references public.profiles(id) on delete cascade,
+  participant_b uuid references public.profiles(id) on delete cascade,
+  created_at  timestamptz default now(),
+  unique (participant_a, participant_b)
+);
+
+create table if not exists public.messages (
+  id          uuid primary key default gen_random_uuid(),
+  conversation_id uuid references public.conversations(id) on delete cascade,
+  from_id     uuid references public.profiles(id) on delete cascade,
+  text        text default '',
+  photo       text,
+  read        boolean default false,
+  created_at  timestamptz default now()
+);
+
+-- ── Announcements / admin notifications ─────────────────────────────
+create table if not exists public.announcements (
+  id          uuid primary key default gen_random_uuid(),
+  title       text,
+  text        text not null,
+  level       text default 'normal' check (level in ('normal','important','urgent')),
+  audience    text,
+  pinned      boolean default false,
+  views       int default 0,
+  date        date default current_date,
+  created_at  timestamptz default now()
+);
+
+-- ── Row Level Security ──────────────────────────────────────────────
+alter table public.profiles      enable row level security;
+alter table public.likes         enable row level security;
+alter table public.matches       enable row level security;
+alter table public.conversations enable row level security;
+alter table public.messages      enable row level security;
+alter table public.announcements enable row level security;
+
+-- Profiles: everyone signed-in can read; you can edit only your own row.
+create policy "profiles readable" on public.profiles for select using (auth.role() = 'authenticated');
+create policy "profiles self-insert" on public.profiles for insert with check (auth.uid() = id);
+create policy "profiles self-update" on public.profiles for update using (auth.uid() = id);
+
+-- Likes / matches: signed-in can read; create your own.
+create policy "likes readable" on public.likes for select using (auth.role() = 'authenticated');
+create policy "likes insert own" on public.likes for insert with check (auth.uid() = from_id);
+create policy "matches readable" on public.matches for select using (auth.role() = 'authenticated');
+create policy "matches insert" on public.matches for insert with check (auth.role() = 'authenticated');
+
+-- Conversations: only participants can see/create.
+create policy "conv readable" on public.conversations for select
+  using (auth.uid() = participant_a or auth.uid() = participant_b);
+create policy "conv insert" on public.conversations for insert
+  with check (auth.uid() = participant_a or auth.uid() = participant_b);
+
+-- Messages: only conversation participants can read; you send as yourself.
+create policy "msg readable" on public.messages for select using (
+  exists (select 1 from public.conversations c
+          where c.id = conversation_id
+            and (c.participant_a = auth.uid() or c.participant_b = auth.uid()))
+);
+create policy "msg insert own" on public.messages for insert with check (auth.uid() = from_id);
+create policy "msg update read" on public.messages for update using (
+  exists (select 1 from public.conversations c
+          where c.id = conversation_id
+            and (c.participant_a = auth.uid() or c.participant_b = auth.uid()))
+);
+
+-- Announcements: everyone signed-in reads; only admins write.
+create policy "ann readable" on public.announcements for select using (auth.role() = 'authenticated');
+create policy "ann admin write" on public.announcements for all using (
+  exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin')
+);
+
+-- ── Realtime: broadcast row changes for live chat & announcements ───
+alter publication supabase_realtime add table public.messages;
+alter publication supabase_realtime add table public.conversations;
+alter publication supabase_realtime add table public.announcements;
