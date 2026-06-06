@@ -72,7 +72,12 @@ export default function Navbar({ theme, onToggleTheme }) {
   if (!currentUser) return null;
 
   const role = currentUser.role;
-  const links = role === 'admin' ? ADMIN_LINKS : (role === 'mentor' || currentUser.isMentor) ? MENTOR_LINKS : STUDENT_LINKS;
+  const isMod = role === 'moderator' || currentUser.isModerator;
+  const links = role === 'admin'
+    ? ADMIN_LINKS
+    : isMod
+      ? [...STUDENT_LINKS, { to: '/moderator', label: 'Модерация', icon: '🛡️' }]
+      : (role === 'mentor' || currentUser.isMentor) ? MENTOR_LINKS : STUDENT_LINKS;
 
   return (
     <nav className="navbar">
@@ -130,12 +135,12 @@ export default function Navbar({ theme, onToggleTheme }) {
             </div>
           )}
           <button
-            className="nav-theme-btn"
+            className="nav-theme-btn nav-theme-pill"
             onClick={onToggleTheme}
-            title={theme === 'dark' ? 'Светлая тема' : 'Тёмная тема'}
             aria-label="Переключить тему"
           >
-            {theme === 'dark' ? '☀️' : '🌙'}
+            <span className={`pill-opt ${theme !== 'dark' ? 'pill-active' : ''}`}>☀️ Светлая</span>
+            <span className={`pill-opt ${theme === 'dark' ? 'pill-active' : ''}`}>🌙 Тёмная</span>
           </button>
           {role !== 'admin' && (
             <NavLink to="/complaints" className="nav-complaint-btn" title="Пожаловаться" onClick={() => setMenuOpen(false)}>

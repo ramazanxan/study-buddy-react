@@ -16,6 +16,7 @@ import Marketplace from './pages/Marketplace/Marketplace';
 import Announcements from './pages/Announcements/Announcements';
 import Complaints from './pages/Complaints/Complaints';
 import Admin from './pages/Admin/Admin';
+import ModeratorPanel from './pages/ModeratorPanel/ModeratorPanel';
 
 function ProtectedRoute({ children }) {
   const { currentUser } = useApp();
@@ -77,6 +78,9 @@ function AppRoutes() {
 
         {/* Mentor only */}
         <Route path="/mentor-panel" element={<MentorRoute><MentorPanel /></MentorRoute>} />
+
+        {/* Moderator */}
+        <Route path="/moderator" element={<ProtectedRoute><ModeratorPanel /></ProtectedRoute>} />
 
         {/* Admin only */}
         <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />

@@ -101,7 +101,7 @@
   padding: 7px 16px;
   border-radius: 99px;
   border: 1.5px solid var(--border);
-  background: #fff;
+  background: var(--bg-card);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -151,7 +151,7 @@
 
 /* Listing Card */
 .listing-card {
-  background: #fff;
+  background: var(--bg-card);
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
@@ -363,7 +363,7 @@
 }
 
 .photo-add-btn span:first-child { font-size: 22px; }
-.photo-add-btn:hover { border-color: var(--primary); color: var(--primary); background: #fff5f4; }
+.photo-add-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--bg-muted); }
 
 .photo-hint { font-size: 11px; color: var(--text-muted); margin: 4px 0 0; }
 
@@ -381,7 +381,7 @@
 }
 
 .modal-wrap {
-  background: #fff;
+  background: var(--bg-card);
   border-radius: var(--radius-xl);
   width: 100%;
   max-width: 540px;
@@ -418,7 +418,7 @@
   display: flex; align-items: center; justify-content: center;
   color: var(--text-muted);
 }
-.modal-close:hover { background: #f0f0f5; }
+.modal-close:hover { background: var(--border); }
 
 .modal-body {
   flex: 1;

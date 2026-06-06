@@ -3,6 +3,7 @@ const BADGE_MAP = {
   eje: { icon: '👩‍🏫', label: 'Эже', bg: 'rgba(255,95,87,0.12)', color: 'var(--primary-dark)' },
   reliable_partner: { icon: '🤝', label: 'Надёжный партнёр', bg: 'rgba(6,214,160,0.14)', color: '#05a87e' },
   admin: { icon: '⚡', label: 'Админ', bg: 'rgba(255,159,28,0.16)', color: 'var(--spark)' },
+  moderator: { icon: '🛡️', label: 'Модератор', bg: 'rgba(14,148,136,0.14)', color: 'var(--secondary)' },
 };
 
 export default function Badge({ type }) {

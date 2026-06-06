@@ -162,7 +162,7 @@ function DashboardSection() {
 // ── STUDENTS ───────────────────────────────────────────
 const PAGE_SIZE = 10;
 function StudentsSection() {
-  const { users, banUser, unbanUser, grantBadge } = useApp();
+  const { users, banUser, unbanUser, grantBadge, toggleModerator } = useApp();
   const [search, setSearch] = useState('');
   const [faculty, setFaculty] = useState('');
   const [course, setCourse] = useState('');
@@ -230,6 +230,9 @@ function StudentsSection() {
                     : <button className="act-btn danger" onClick={() => { banUser(u.id); showToast(`${u.fullName} заблокирован`); }}>🚫 Заблокировать</button>}
                   <button className="act-btn" onClick={() => { grantBadge(u.id, 'reliable_partner'); showToast(`Бейдж обновлён`); }}>
                     {u.badges?.includes('reliable_partner') ? '🏅 −Партнёр' : '🏅 +Партнёр'}
+                  </button>
+                  <button className="act-btn" onClick={() => { toggleModerator(u.id); showToast(u.isModerator || u.role==='moderator' ? `${u.fullName} снят с модерации` : `${u.fullName} — теперь модератор`); }}>
+                    {u.isModerator || u.role === 'moderator' ? '🛡️ −Модератор' : '🛡️ +Модератор'}
                   </button>
                 </div></td>
               </tr>

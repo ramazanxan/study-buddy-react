@@ -1,6 +1,7 @@
 import { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
 import { seedData } from './mockData';
 import { uid } from '../utils/helpers';
+import { supabase } from '../lib/supabase';
 
 const STORAGE_KEY = 'studybuddy_state_v2';
 const SESSION_KEY = 'studybuddy_session_v2';
@@ -186,6 +187,41 @@ export function AppProvider({ children }) {
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
+  // ── Supabase auth state sync ─────────────────────────────────
+  useEffect(() => {
+    if (!supabase) return;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        const meta = session.user.user_metadata || {};
+        const supabaseUser = {
+          id: session.user.id,
+          login: meta.login || session.user.email,
+          email: session.user.email,
+          fullName: meta.full_name || '',
+          faculty: meta.faculty || '',
+          direction: meta.direction || '',
+          groupName: meta.group_name || '—',
+          course: meta.course || 1,
+          age: meta.age || 0,
+          about: meta.about || '',
+          role: meta.role || 'student',
+          isMentor: meta.is_mentor || false,
+          photo: meta.photo || null,
+          interests: meta.interests || [],
+          reputation: meta.reputation || 0,
+          badges: meta.badges || [],
+          isBanned: false,
+          createdAt: session.user.created_at,
+          lastSeen: new Date().toISOString(),
+        };
+        dispatch({ type: 'SET_CURRENT_USER', user: supabaseUser });
+      } else {
+        dispatch({ type: 'SET_CURRENT_USER', user: null });
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
   // ── Auth ─────────────────────────────────────────────────────
   const register = useCallback((data) => {
     const exists = state.users.some((u) => u.login.toLowerCase() === data.login.toLowerCase());
@@ -232,6 +268,11 @@ export function AppProvider({ children }) {
   }, [state.users]);
 
   const logout = useCallback(() => {
+    if (supabase) {
+      supabase.auth.signOut();
+      // SET_CURRENT_USER will be called by onAuthStateChange when session clears
+      return;
+    }
     if (state.currentUser) {
       dispatch({ type: 'UPDATE_USER', user: { ...state.currentUser, lastSeen: new Date().toISOString() } });
     }
@@ -560,6 +601,22 @@ export function AppProvider({ children }) {
 
   const getUser = useCallback((id) => state.users.find((u) => u.id === id), [state.users]);
 
+  // ── Moderator ────────────────────────────────────────────────
+  const toggleModerator = useCallback((userId) => {
+    const u = state.users.find((x) => x.id === userId);
+    if (!u || u.role === 'admin') return;
+    const isMod = u.role === 'moderator' || u.isModerator;
+    const updated = {
+      ...u,
+      role: isMod ? (u.isMentor ? 'mentor' : 'student') : 'moderator',
+      isModerator: !isMod,
+      badges: isMod
+        ? u.badges.filter((b) => b !== 'moderator')
+        : [...(u.badges || []).filter((b) => b !== 'moderator'), 'moderator'],
+    };
+    dispatch({ type: 'UPDATE_USER', user: updated });
+  }, [state.users]);
+
   const value = {
     ...state,
     // auth
@@ -595,7 +652,7 @@ export function AppProvider({ children }) {
     addAnnouncement, updateAnnouncement, removeAnnouncement,
     // admin
     grantBadge, banUser, unbanUser,
-    getUser,
+    getUser, toggleModerator,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -121,19 +121,38 @@
 .nav-complaint-btn:hover { background: color-mix(in srgb, var(--primary) 12%, transparent); }
 
 .nav-theme-btn {
-  width: 32px; height: 32px;
-  border-radius: 8px;
-  border: none;
+  height: 32px;
+  border-radius: 99px;
+  border: 1.5px solid var(--border);
   background: var(--bg-muted);
-  font-size: 15px;
+  font-size: 13px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: background var(--transition), transform var(--transition);
+  padding: 3px;
+  gap: 0;
+  transition: border-color var(--transition);
+}
+.nav-theme-btn:hover { border-color: var(--primary); }
+
+.nav-theme-pill { width: auto; }
+
+.pill-opt {
+  padding: 2px 9px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: background var(--transition), color var(--transition);
+  white-space: nowrap;
+  font-family: var(--font-body);
 }
 
-.nav-theme-btn:hover { transform: scale(1.1); }
+.pill-active {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+}
 
 .nav-notif-wrap { position: relative; }
 .nav-notif-dot {
