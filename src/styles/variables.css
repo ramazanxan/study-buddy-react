@@ -64,9 +64,9 @@
 
 /* ── Dark theme: violet-tinted, compatible with the light layout ── */
 [data-theme='dark'] {
-  --bg:        #061008;
-  --bg-card:   #0E2418;
-  --bg-muted:  #143324;
+  --bg:        #0D1F14;
+  --bg-card:   #162B1E;
+  --bg-muted:  #1E3D2A;
   --text:      #ECFDF5;
   --text-muted: rgba(209, 250, 229, 0.66);
   --text-light: rgba(209, 250, 229, 0.42);

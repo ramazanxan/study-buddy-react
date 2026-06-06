@@ -55,7 +55,7 @@
   padding: 6px 14px;
   border: 1.5px solid var(--border);
   border-radius: 99px;
-  background: #fff;
+  background: var(--bg-card);
   cursor: pointer;
   font-size: 13px;
   font-weight: 600;
@@ -65,7 +65,7 @@
 }
 
 .win-react:hover:not(:disabled) { border-color: var(--primary); }
-.win-react.reacted { border-color: var(--primary); background: #fff0ef; color: var(--primary); }
+.win-react.reacted { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 12%, var(--bg-card)); color: var(--primary); }
 .win-react:disabled { cursor: default; }
 
 .win-admin-remove {

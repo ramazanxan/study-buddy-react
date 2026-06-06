@@ -35,6 +35,17 @@ export default function Chat() {
     return () => clearInterval(t);
   }, [pingOnline]);
 
+  // Fix: re-sync when user switches back to this browser tab
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === 'visible' && activeConvId) {
+        markRead(activeConvId);
+      }
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [activeConvId, markRead]);
+
   const myConvs = useMemo(
     () => conversations.filter((c) => c.participants.includes(currentUser.id)),
     [conversations, currentUser.id]
@@ -79,9 +90,9 @@ export default function Chat() {
     });
   }, [myConvs, searchQ, currentUser.id, getUser]);
 
-  // Users available to chat (everyone except admin and self)
+  // Users available to chat — admin sees everyone; others see everyone incl. admin
   const availableUsers = useMemo(() => {
-    return users.filter((u) => u.id !== currentUser.id && u.role !== 'admin' && !u.isBanned);
+    return users.filter((u) => u.id !== currentUser.id && !u.isBanned);
   }, [users, currentUser.id]);
 
   const searchedUsers = useMemo(() => {
@@ -273,6 +284,7 @@ export default function Chat() {
                 {thread.map((msg, i) => {
                   const mine = msg.from === currentUser.id;
                   const sender = getUser(msg.from);
+                  const isAdminMsg = !mine && sender?.role === 'admin';
                   const showAvatar = !mine && (i === 0 || thread[i - 1]?.from !== msg.from);
                   return (
                     <div key={msg.id} className={`bubble-row ${mine ? 'mine' : 'theirs'}`}>
@@ -281,7 +293,10 @@ export default function Chat() {
                           <Avatar user={sender} size="sm" />
                         </div>
                       )}
-                      <div className="bubble">
+                      <div className={`bubble ${isAdminMsg ? 'admin-bubble' : ''}`}>
+                        {isAdminMsg && (
+                          <span className="bubble-admin-badge">⚡ Администратор</span>
+                        )}
                         {msg.photo && (
                           <img
                             src={msg.photo}

@@ -69,7 +69,7 @@ function AppRoutes() {
         {/* Student & Mentor only */}
         <Route path="/profile" element={<StudentOnlyRoute><Profile /></StudentOnlyRoute>} />
         <Route path="/profile/:id" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-        <Route path="/chat" element={<StudentOnlyRoute><Chat /></StudentOnlyRoute>} />
+        <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
         <Route path="/goals" element={<StudentOnlyRoute><Goals /></StudentOnlyRoute>} />
         <Route path="/mentorship" element={<StudentOnlyRoute><Mentorship /></StudentOnlyRoute>} />
         <Route path="/announcements" element={<StudentOnlyRoute><Announcements /></StudentOnlyRoute>} />

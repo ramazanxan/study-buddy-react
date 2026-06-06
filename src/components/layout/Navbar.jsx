@@ -25,6 +25,7 @@ const MENTOR_LINKS = [
 
 const ADMIN_LINKS = [
   { to: '/feed',  label: 'Лента',   icon: '🔥' },
+  { to: '/chat',  label: 'Чаты',    icon: '💬', badge: true },
   { to: '/wins',  label: 'Победы',  icon: '🏆' },
   { to: '/admin', label: 'Панель',  icon: '⚡' },
 ];
