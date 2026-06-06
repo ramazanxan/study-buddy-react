@@ -9,7 +9,8 @@ const hashPassword = (p) => 'h$' + btoa(unescape(encodeURIComponent(p)));
 
 function loadState() {
   try {
-    const sessionId = localStorage.getItem(SESSION_KEY);
+    // Session is per-tab (sessionStorage) so two tabs can hold different accounts.
+    const sessionId = sessionStorage.getItem(SESSION_KEY);
     const raw = localStorage.getItem(STORAGE_KEY);
     const base = raw ? JSON.parse(raw) : structuredClone(seedData);
     // ensure new collections exist on old saves
@@ -30,6 +31,16 @@ function reducer(state, action) {
   switch (action.type) {
     case 'SET_CURRENT_USER':
       return { ...state, currentUser: action.user };
+
+    // Replace all shared data with a version written by another tab,
+    // while keeping THIS tab's logged-in user (re-resolved with fresh data).
+    case 'HYDRATE': {
+      const data = action.data;
+      const currentUser = state.currentUser
+        ? data.users.find((u) => u.id === state.currentUser.id) || state.currentUser
+        : null;
+      return { ...data, currentUser };
+    }
 
     case 'ADD_USER':
       return { ...state, users: [...state.users, action.user] };
@@ -152,12 +163,28 @@ export function AppProvider({ children }) {
     const { currentUser, ...persist } = state;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(persist));
-      if (currentUser) localStorage.setItem(SESSION_KEY, currentUser.id);
-      else localStorage.removeItem(SESSION_KEY);
+      // Session is per-tab so different tabs can be logged in as different users.
+      if (currentUser) sessionStorage.setItem(SESSION_KEY, currentUser.id);
+      else sessionStorage.removeItem(SESSION_KEY);
     } catch (e) {
       console.warn('Persist failed', e);
     }
   }, [state]);
+
+  // Live cross-tab sync: when another tab writes shared data (chat messages,
+  // announcements, likes…), pull it into this tab without touching our session.
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key !== STORAGE_KEY || !e.newValue) return;
+      try {
+        dispatch({ type: 'HYDRATE', data: JSON.parse(e.newValue) });
+      } catch (err) {
+        console.warn('Cross-tab sync failed', err);
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   // ── Auth ─────────────────────────────────────────────────────
   const register = useCallback((data) => {

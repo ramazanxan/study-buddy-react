@@ -22,11 +22,6 @@ const MOCK_NEWS_INIT = [
   { id: 'n2', title: 'Хакатон KSTU Hack 2026', text: 'Приглашаем студентов принять участие в ежегодном хакатоне. Призовой фонд — 150 000 сом. Регистрация открыта.', date: '2026-06-10', pinned: false },
   { id: 'n3', title: 'Стипендиальная программа от Huawei', text: 'Компания Huawei объявила о стипендиальной программе для студентов IT-специальностей КГТУ.', date: '2026-06-05', pinned: false },
 ];
-const MOCK_ANNOUNCES_INIT = [
-  { id: 'a1', text: 'Экзаменационная сессия начинается 16 июня 2026 года. Расписание опубликовано на сайте деканата.', level: 'urgent', date: '2026-06-06', pinned: true },
-  { id: 'a2', text: 'Столовая корпуса №3 временно закрыта на ремонт до 15 июня.', level: 'normal', date: '2026-06-04', pinned: false },
-  { id: 'a3', text: 'Приём заявлений на перевод между группами — до 20 июня.', level: 'important', date: '2026-06-03', pinned: false },
-];
 const MOCK_FILES = [
   { id: 'f1', name: 'Учебный план ИИТ 2026.pdf', size: '1.2 МБ', date: '01.06.2026', icon: '📄' },
   { id: 'f2', name: 'Статистика успеваемости.xlsx', size: '456 КБ', date: '28.05.2026', icon: '📊' },
@@ -380,19 +375,20 @@ function NewsSection() {
 
 // ── ANNOUNCEMENTS ──────────────────────────────────────
 function AnnouncementsSection() {
-  const [items, setItems] = useState(MOCK_ANNOUNCES_INIT);
+  const { announcements, addAnnouncement, updateAnnouncement, removeAnnouncement } = useApp();
+  const items = announcements;
   const [form, setForm] = useState({ text: '', level: 'normal', date: '' });
   const [toast, showToast, clearToast] = useToast();
   const LEVEL_LABEL = { normal: 'Обычное', important: 'Важное', urgent: 'Срочное' };
 
   const add = () => {
     if (!form.text.trim()) return;
-    setItems([{ id: 'a' + Date.now(), text: form.text, level: form.level, date: form.date || new Date().toISOString().slice(0,10), pinned: false }, ...items]);
+    addAnnouncement({ text: form.text, level: form.level, date: form.date || new Date().toISOString().slice(0,10), pinned: false });
     setForm({ text: '', level: 'normal', date: '' });
-    showToast('Объявление добавлено');
+    showToast('✅ Опубликовано — видно студентам и наставникам');
   };
-  const pin = (id) => setItems(items.map((a) => a.id === id ? { ...a, pinned: !a.pinned } : a));
-  const del = (id) => { setItems(items.filter((a) => a.id !== id)); showToast('Объявление удалено'); };
+  const pin = (id) => { const a = items.find((x) => x.id === id); if (a) updateAnnouncement({ ...a, pinned: !a.pinned }); };
+  const del = (id) => { removeAnnouncement(id); showToast('Объявление удалено'); };
 
   return (
     <>
@@ -444,7 +440,7 @@ function AnnouncementsSection() {
 
 // ── NOTIFICATIONS ──────────────────────────────────────
 function NotificationsSection() {
-  const { users } = useApp();
+  const { users, addAnnouncement } = useApp();
   const [recipients, setRecipients] = useState('all');
   const [institute, setInstitute] = useState('');
   const [text, setText] = useState('');
@@ -458,9 +454,18 @@ function NotificationsSection() {
     if (recipients === 'institute' && institute) label = `Институт ${institute}`;
     if (recipients === 'new') label = 'Новые пользователи';
     const count = recipients === 'all' ? users.length : recipients === 'institute' ? users.filter(u => u.faculty === institute).length : 5;
+    // Publish to the shared announcements feed so students AND mentors see it in their "Объявления" tab.
+    addAnnouncement({
+      title: '🔔 Уведомление от администрации',
+      text,
+      audience: label,
+      level: 'important',
+      date: new Date().toISOString().slice(0, 10),
+      pinned: false,
+    });
     setHistory([{ id: 'nh' + Date.now(), text, recipients: label, date: new Date().toLocaleDateString('ru') }, ...history]);
     setText('');
-    showToast(`✅ Уведомление отправлено ${count} пользователям`);
+    showToast(`✅ Уведомление отправлено ${count} пользователям — видно в их вкладке «Объявления»`);
   };
 
   return (

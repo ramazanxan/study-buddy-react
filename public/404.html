@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <title>StudyBuddy</title>
+    <script>
+      // SPA fallback for GitHub Pages: redirect deep links back to index.html
+      // preserving the original path so the React router can take over.
+      (function () {
+        var segmentCount = 1; // repo name segment in the path
+        var l = window.location;
+        var path = l.pathname
+          .split('/')
+          .slice(0, 1 + segmentCount)
+          .join('/');
+        var rest = l.pathname.slice(path.length);
+        l.replace(
+          l.protocol + '//' + l.host + path + '/?/' +
+          rest.replace(/&/g, '~and~') +
+          (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+          l.hash
+        );
+      })();
+    </script>
+  </head>
+  <body></body>
+</html>
