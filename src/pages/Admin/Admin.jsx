@@ -68,17 +68,24 @@ export default function Admin() {
   if (!currentUser || currentUser.role !== 'admin') return <Navigate to="/feed" replace />;
 
   const [section, setSection] = useState('dashboard');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const allItems = NAV.flatMap((g) => g.items);
+  const current = allItems.find((i) => i.key === section);
+
+  const pick = (key) => { setSection(key); setMenuOpen(false); };
 
   return (
     <div className="admin-page">
-      {/* Sidebar — desktop */}
+      {/* Desktop sidebar */}
       <aside className="admin-sidebar">
         {NAV.map((g) => (
           <div key={g.section} className="admin-sidebar-group">
             <span className="admin-sidebar-group-label">{g.section}</span>
             {g.items.map((item) => (
-              <button key={item.key} className={`admin-nav-btn ${section === item.key ? 'active' : ''}`} onClick={() => setSection(item.key)}>
+              <button key={item.key}
+                className={`admin-nav-btn ${section === item.key ? 'active' : ''}`}
+                onClick={() => setSection(item.key)}>
                 <span className="nav-icon">{item.icon}</span> {item.label}
               </button>
             ))}
@@ -86,36 +93,59 @@ export default function Admin() {
         ))}
       </aside>
 
-      {/* RIGHT side: mobile tabs + content */}
+      {/* Content area */}
       <div className="admin-right">
-        {/* Mobile horizontal tab bar — sticky at top of admin-right */}
-        <div className="admin-mobile-tabs">
-          {NAV.flatMap((g) => g.items).map((item) => (
-            <button
-              key={item.key}
-              className={`admin-mobile-tab ${section === item.key ? 'active' : ''}`}
-              onClick={() => setSection(item.key)}
-            >
-              <span className="amt-icon">{item.icon}</span>
-              <span className="amt-label">{item.label}</span>
-            </button>
-          ))}
+
+        {/* Mobile top bar with menu button */}
+        <div className="admin-topbar">
+          <span className="admin-topbar-title">
+            {current?.icon} {current?.label}
+          </span>
+          <button className="admin-menu-btn" onClick={() => setMenuOpen(true)}>
+            ☰ Меню
+          </button>
         </div>
 
-        {/* Main content */}
-        <main className="admin-main">
+        {/* Bottom-sheet menu overlay */}
+        {menuOpen && (
+          <>
+            <div className="admin-sheet-overlay" onClick={() => setMenuOpen(false)} />
+            <div className="admin-sheet">
+              <div className="admin-sheet-head">
+                <span>Навигация</span>
+                <button className="admin-sheet-close" onClick={() => setMenuOpen(false)}>✕</button>
+              </div>
+              <div className="admin-sheet-body">
+                {NAV.map((g) => (
+                  <div key={g.section} className="admin-sheet-group">
+                    <div className="admin-sheet-group-label">{g.section}</div>
+                    {g.items.map((item) => (
+                      <button key={item.key}
+                        className={`admin-sheet-item ${section === item.key ? 'active' : ''}`}
+                        onClick={() => pick(item.key)}>
+                        <span className="admin-sheet-icon">{item.icon}</span>
+                        <span>{item.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
 
-        {section === 'dashboard'         && <DashboardSection />}
-        {section === 'students'          && <StudentsSection />}
-        {section === 'mentors'           && <MentorsSection />}
-        {section === 'moderators'        && <ModeratorsSection />}
-        {section === 'news'              && <NewsSection />}
-        {section === 'ann_admin'         && <AnnouncementsSection />}
-        {section === 'notifications'     && <NotificationsSection />}
-        {section === 'complaints_admin'  && <ComplaintsAdminSection />}
-        {section === 'files'             && <FilesSection />}
-        {section === 'statistics'        && <StatisticsSection />}
-        {section === 'settings'          && <SettingsSection />}
+        <main className="admin-main">
+          {section === 'dashboard'         && <DashboardSection />}
+          {section === 'students'          && <StudentsSection />}
+          {section === 'mentors'           && <MentorsSection />}
+          {section === 'moderators'        && <ModeratorsSection />}
+          {section === 'news'              && <NewsSection />}
+          {section === 'ann_admin'         && <AnnouncementsSection />}
+          {section === 'notifications'     && <NotificationsSection />}
+          {section === 'complaints_admin'  && <ComplaintsAdminSection />}
+          {section === 'files'             && <FilesSection />}
+          {section === 'statistics'        && <StatisticsSection />}
+          {section === 'settings'          && <SettingsSection />}
         </main>
       </div>
     </div>

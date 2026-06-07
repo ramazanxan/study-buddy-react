@@ -53,14 +53,16 @@ function KstuWatermark() {
         @keyframes kstu-glow-pulse {
           0%,100% {
             filter:
-              drop-shadow(0 0 10px rgba(10,59,171,0.55))
-              drop-shadow(0 0 28px rgba(10,59,171,0.28));
+              drop-shadow(0 0 6px rgba(10,59,171,0.70))
+              drop-shadow(0 0 18px rgba(10,59,171,0.40))
+              saturate(1.4) contrast(1.1);
           }
           50% {
             filter:
-              drop-shadow(0 0 22px rgba(10,59,171,0.95))
-              drop-shadow(0 0 55px rgba(10,59,171,0.50))
-              drop-shadow(0 0 80px rgba(93,187,42,0.22));
+              drop-shadow(0 0 16px rgba(10,59,171,1.0))
+              drop-shadow(0 0 40px rgba(10,59,171,0.65))
+              drop-shadow(0 0 70px rgba(26,92,232,0.35))
+              saturate(1.8) contrast(1.2) brightness(1.15);
           }
         }
       `}</style>
@@ -78,7 +80,7 @@ function KstuWatermark() {
           height: 'min(52vmin, 480px)',
           pointerEvents: 'none',
           zIndex: 1,
-          opacity: 0.14,
+          opacity: 0.22,
         }}
       >
         {/* Inner: rotation + float — separate from translate centering */}

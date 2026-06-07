@@ -245,6 +245,72 @@
 
 .cac-text { font-size: 13px; color: var(--text-muted); font-style: italic; }
 
+/* ── Mobile top bar ── */
+.admin-topbar {
+  display: none; /* hidden on desktop */
+}
+
+/* ── Bottom-sheet overlay ── */
+.admin-sheet-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1000;
+}
+.admin-sheet {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--bg-card);
+  border-radius: 20px 20px 0 0;
+  z-index: 1001;
+  max-height: 80vh;
+  display: flex; flex-direction: column;
+  box-shadow: 0 -4px 32px rgba(0,0,0,0.18);
+  animation: sheet-up 0.25s cubic-bezier(0.22,1,0.36,1);
+}
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+.admin-sheet-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 700; font-size: 16px; color: var(--text);
+  flex-shrink: 0;
+}
+.admin-sheet-close {
+  width: 32px; height: 32px;
+  border-radius: 8px; background: var(--bg-muted);
+  border: none; cursor: pointer; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted);
+}
+.admin-sheet-body {
+  overflow-y: auto; padding: 12px 12px 24px;
+  -webkit-overflow-scrolling: touch;
+}
+.admin-sheet-group { margin-bottom: 8px; }
+.admin-sheet-group-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--text-light);
+  padding: 8px 8px 4px; display: block;
+}
+.admin-sheet-item {
+  width: 100%; display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border-radius: var(--radius-sm);
+  background: none; border: none; cursor: pointer;
+  font-size: 15px; font-weight: 500; color: var(--text-muted);
+  text-align: left; transition: background var(--transition), color var(--transition);
+  font-family: var(--font-body);
+  -webkit-tap-highlight-color: transparent;
+}
+.admin-sheet-item:hover  { background: var(--bg-muted); color: var(--text); }
+.admin-sheet-item.active {
+  background: color-mix(in srgb, var(--primary) 12%, var(--bg-card));
+  color: var(--primary); font-weight: 700;
+}
+.admin-sheet-icon { font-size: 20px; width: 28px; text-align: center; flex-shrink: 0; }
+
 /* ── Tab bar: always in DOM, desktop hides it via max-height trick ── */
 .admin-mobile-tabs {
   overflow-x: auto;
@@ -303,6 +369,32 @@
     -webkit-overflow-scrolling: touch;
     display: flex;
     flex-direction: column;
+  }
+
+  /* Show top bar on mobile */
+  .admin-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 50;
+    flex-shrink: 0;
+  }
+  .admin-topbar-title {
+    font-size: 15px; font-weight: 700; color: var(--text);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .admin-menu-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border-radius: var(--radius-full);
+    background: var(--primary); color: #fff;
+    border: none; cursor: pointer;
+    font-size: 14px; font-weight: 600;
+    font-family: var(--font-body);
+    box-shadow: 0 2px 8px rgba(93,187,42,0.30);
+    -webkit-tap-highlight-color: transparent;
   }
 
   .admin-main { padding: 14px; flex: 1; }
