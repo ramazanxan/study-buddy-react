@@ -5,6 +5,7 @@ import { useApp } from '../../store/AppContext';
 import Avatar from '../../components/common/Avatar';
 import Button from '../../components/common/Button';
 import { formatDate, truncate } from '../../utils/helpers';
+import { getPasswordStrength, passwordCriteria } from '../../utils/validators';
 import './Admin.css';
 
 // ── Excel/CSV export — открывается в Excel, с BOM для кириллицы ──
@@ -204,43 +205,89 @@ function DashboardSection() {
 }
 
 // ── ADD USER MODAL ─────────────────────────────────────
+const CRITERIA_LABELS = [
+  ['length', '8+ символов'], ['upper', 'Заглавная'], ['lower', 'Строчная'], ['digit', 'Цифра'],
+];
+
 function AddUserModal({ onAdd, onClose }) {
-  const [form, setForm] = useState({ login: '', fullName: '', faculty: KGTU_FACULTIES[0].id, direction: KGTU_FACULTIES[0].directions[0], course: 1, age: 18, password: 'pass123', role: 'student' });
+  const [form, setForm] = useState({ login: '', fullName: '', faculty: KGTU_FACULTIES[0].id, direction: KGTU_FACULTIES[0].directions[0], course: 1, age: 18, password: '', role: 'student', about: '' });
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const setFaculty = (id) => setForm((f) => ({ ...f, faculty: id, direction: KGTU_FACULTIES.find((x) => x.id === id)?.directions[0] || '' }));
   const currentFaculty = KGTU_FACULTIES.find((f) => f.id === form.faculty) || KGTU_FACULTIES[0];
+  const strength = getPasswordStrength(form.password);
+  const criteria = passwordCriteria(form.password);
+
   const submit = () => {
-    if (!form.login.trim() || !form.fullName.trim()) return;
+    if (!form.login.trim() || !form.fullName.trim() || !form.password) return;
     onAdd(form);
     onClose();
   };
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-card" onClick={(e) => e.stopPropagation()}>
         <h3 style={{ marginBottom: 16 }}>➕ Добавить пользователя</h3>
-        <div className="form-group"><label className="label">Логин</label><input className="input" value={form.login} onChange={(e) => set('login', e.target.value)} placeholder="ivanov" /></div>
-        <div className="form-group" style={{ marginTop: 10 }}><label className="label">ФИО</label><input className="input" value={form.fullName} onChange={(e) => set('fullName', e.target.value)} placeholder="Иван Иванов" /></div>
+
+        <div className="form-group">
+          <label className="label">Логин</label>
+          <input className="input" value={form.login} onChange={(e) => set('login', e.target.value)} placeholder="ivanov" />
+        </div>
+
+        <div className="form-group" style={{ marginTop: 10 }}>
+          <label className="label">ФИО</label>
+          <input className="input" value={form.fullName} onChange={(e) => set('fullName', e.target.value)} placeholder="Иван Иванов" />
+        </div>
+
         <div className="form-group" style={{ marginTop: 10 }}>
           <label className="label">Институт</label>
           <select className="input" value={form.faculty} onChange={(e) => setFaculty(e.target.value)}>
             {KGTU_FACULTIES.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
           </select>
         </div>
+
         <div className="form-group" style={{ marginTop: 10 }}>
           <label className="label">Направление</label>
           <select className="input" value={form.direction} onChange={(e) => set('direction', e.target.value)}>
             {currentFaculty.directions.map((d) => <option key={d} value={d}>{d}</option>)}
           </select>
         </div>
+
         <div className="admin-form-row" style={{ marginTop: 10 }}>
-          <div className="form-group"><label className="label">Курс</label><input className="input" type="number" min={1} max={5} value={form.course} onChange={(e) => set('course', e.target.value)} /></div>
-          <div className="form-group"><label className="label">Возраст</label><input className="input" type="number" min={14} max={80} value={form.age} onChange={(e) => set('age', e.target.value)} /></div>
+          <div className="form-group">
+            <label className="label">Курс</label>
+            <input className="input" type="number" min={1} max={5} value={form.course} onChange={(e) => set('course', e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label className="label">Возраст</label>
+            <input className="input" type="number" min={14} max={80} value={form.age} onChange={(e) => set('age', e.target.value)} />
+          </div>
         </div>
-        <div className="form-group" style={{ marginTop: 10 }}><label className="label">Пароль</label><input className="input" value={form.password} onChange={(e) => set('password', e.target.value)} /></div>
+
+        <div className="form-group" style={{ marginTop: 10 }}>
+          <label className="label">Пароль</label>
+          <input className="input" type="password" value={form.password} onChange={(e) => set('password', e.target.value)} placeholder="Минимум 8 символов" />
+          {form.password && (
+            <>
+              <div className="strength-bar" style={{ marginTop: 6 }}>
+                <div className="strength-fill" style={{ width: `${(strength.score / 4) * 100}%`, background: strength.color }} />
+              </div>
+              <div style={{ fontSize: 12, color: strength.color, marginTop: 3 }}>{strength.label}</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 12px', marginTop: 6 }}>
+                {CRITERIA_LABELS.map(([k, l]) => (
+                  <span key={k} style={{ fontSize: 11, color: criteria[k] ? 'var(--success)' : 'var(--text-muted)' }}>
+                    {criteria[k] ? '✓' : '○'} {l}
+                  </span>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
         <div className="form-group" style={{ marginTop: 10 }}>
           <label className="label">О себе</label>
-          <textarea className="textarea" rows={2} placeholder="Интересы, цели, чем занимается..." value={form.about || ''} onChange={(e) => set('about', e.target.value)} />
+          <textarea className="textarea" rows={2} placeholder="Интересы, цели, чем занимается..." value={form.about} onChange={(e) => set('about', e.target.value)} />
         </div>
+
         <div className="form-group" style={{ marginTop: 10 }}>
           <label className="label">Роль</label>
           <select className="input" value={form.role} onChange={(e) => set('role', e.target.value)}>
@@ -248,6 +295,7 @@ function AddUserModal({ onAdd, onClose }) {
             <option value="mentor">Наставник</option>
           </select>
         </div>
+
         <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
           <Button variant="primary" onClick={submit}>Добавить</Button>
           <Button variant="secondary" onClick={onClose}>Отмена</Button>
