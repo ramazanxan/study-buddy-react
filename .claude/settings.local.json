@@ -26,7 +26,10 @@
       "PowerShell(python -c \"import pptx; print\\(pptx.__version__\\)\")",
       "PowerShell(\\(Get-Item \"C:\\\\Users\\\\user\\\\study-buddy-react\\\\StudyBuddy_Presentation.pptx\"\\).Length / 1KB)",
       "Bash(npm install *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)"
     ]
   }
 }
