@@ -88,6 +88,14 @@ export default function Register() {
 
         if (error) {
           const m = error.message || '';
+          // Если Supabase отключил email-регистрацию или недоступен — регистрируем локально
+          if (m.includes('disabled') || m.includes('not enabled') || m.includes('fetch')) {
+            const res = register({ ...form, direction, role: userRole });
+            setLoading(false);
+            if (res.error) setServerError(res.error);
+            else navigate('/feed');
+            return;
+          }
           if (m.includes('already registered') || m.includes('already exists') || m.includes('User already')) {
             setServerError('Этот логин уже занят. Выбери другой.');
           } else if (m.toLowerCase().includes('password')) {
