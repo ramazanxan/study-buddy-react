@@ -230,7 +230,7 @@ function AddUserModal({ onAdd, onClose }) {
 
         <div className="form-group">
           <label className="label">Логин</label>
-          <input className="input" value={form.login} onChange={(e) => set('login', e.target.value)} placeholder="ivanov" />
+          <input className="input" value={form.login} onChange={(e) => set('login', e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))} placeholder="ivanov" />
         </div>
 
         <div className="form-group" style={{ marginTop: 10 }}>
