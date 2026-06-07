@@ -360,24 +360,30 @@
   border-radius: 2px;
 }
 
-/* Compact icon-only theme button — mobile only */
+/* Compact icon-only theme button */
 .nav-theme-compact {
-  display: none;
   width: 32px; height: 32px;
   border-radius: 8px;
   border: 1.5px solid var(--border);
   background: var(--bg-muted);
   font-size: 16px;
   cursor: pointer;
+  display: flex;
   align-items: center;
   justify-content: center;
   transition: border-color var(--transition);
 }
 .nav-theme-compact:hover { border-color: var(--primary); }
 
+/* Desktop: hide compact, show pill */
+@media (min-width: 641px) {
+  .nav-theme-compact { display: none; }
+}
+
+/* Mobile: hide pill, show compact icon */
 @media (max-width: 640px) {
-  .nav-theme-pill { display: none; }
-  .nav-theme-compact { display: flex; }
+  .nav-theme-pill  { display: none !important; }
+  .nav-theme-compact { display: flex !important; }
 }
 
 /* ── Mobile dropdowns — fixed to viewport, never overflow ── */

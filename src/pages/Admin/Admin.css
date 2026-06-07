@@ -245,73 +245,67 @@
 
 .cac-text { font-size: 13px; color: var(--text-muted); font-style: italic; }
 
-/* ====== MOBILE HORIZONTAL TAB BAR ====== */
+/* ── Tab bar: always in DOM, desktop hides it via max-height trick ── */
 .admin-mobile-tabs {
-  display: none; /* hidden on desktop */
+  overflow-x: auto;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--bg-card);
+  border-bottom: 2px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  flex-shrink: 0;
+  /* Show on mobile */
+  display: flex;
+}
+.admin-mobile-tabs::-webkit-scrollbar { display: none; }
+
+.admin-mobile-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-muted);
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.amt-icon  { font-size: 18px; line-height: 1; }
+.amt-label { font-size: 11px; font-weight: 600; }
+.admin-mobile-tab.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(93,187,42,0.30);
 }
 
-/* ── Mobile tab bar — hidden on desktop ── */
-.admin-mobile-tabs { display: none; }
+/* Desktop: hide tab bar (sidebar handles navigation) */
+@media (min-width: 769px) {
+  .admin-mobile-tabs { display: none; }
+}
 
 /* ====== MOBILE ====== */
 @media (max-width: 768px) {
-  /* Hide desktop sidebar */
   .admin-sidebar { display: none; }
 
-  /* admin-right becomes a full-width column */
   .admin-right {
     width: 100%;
     height: calc(100vh - var(--navbar-h));
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-  }
-
-  /* Tab bar — always visible at top, no sticky tricks */
-  .admin-mobile-tabs {
-    display: flex;
-    overflow-x: auto;
-    gap: 8px;
-    padding: 10px 12px;
-    background: var(--bg-card);
-    border-bottom: 2px solid var(--border);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    position: sticky;
-    top: 0;           /* sticky within admin-right scroll container */
-    z-index: 50;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    flex-shrink: 0;
-  }
-  .admin-mobile-tabs::-webkit-scrollbar { display: none; }
-
-  .admin-mobile-tab {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    padding: 8px 14px;
-    border-radius: 12px;
-    border: 1.5px solid var(--border);
-    background: var(--bg-muted);
-    color: var(--text-muted);
-    font-family: var(--font-body);
-    cursor: pointer;
-    white-space: nowrap;
-    flex-shrink: 0;
-    transition: all 0.18s ease;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .amt-icon  { font-size: 18px; line-height: 1; }
-  .amt-label { font-size: 11px; font-weight: 600; }
-
-  .admin-mobile-tab.active {
-    background: var(--primary);
-    border-color: var(--primary);
-    color: #fff;
-    box-shadow: 0 3px 10px rgba(93,187,42,0.30);
   }
 
-  .admin-main { padding: 14px; }
+  .admin-main { padding: 14px; flex: 1; }
   .admin-stat-grid { grid-template-columns: 1fr 1fr; }
   .dash-cols { grid-template-columns: 1fr; }
   .stat-panels { grid-template-columns: 1fr; }
