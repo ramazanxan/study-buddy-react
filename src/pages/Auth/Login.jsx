@@ -2,10 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../../store/AppContext';
 import Button from '../../components/common/Button';
-import { supabase } from '../../lib/supabase';
 import './Auth.css';
-
-const loginToEmail = (login) => `${login.toLowerCase()}@studybuddy.kg`;
 
 export default function Login() {
   const { login } = useApp();
@@ -14,7 +11,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const submit = async (e) => {
+  const submit = (e) => {
     e.preventDefault();
     setError('');
     if (!form.login.trim() || !form.password) {
@@ -22,43 +19,12 @@ export default function Login() {
       return;
     }
     setLoading(true);
-
-    try {
-      if (supabase) {
-        // Try Supabase first (for real registered users)
-        const email = loginToEmail(form.login.trim());
-        const { error: authErr } = await supabase.auth.signInWithPassword({
-          email,
-          password: form.password,
-        });
-
-        if (!authErr) {
-          // Supabase login OK — AppContext picks up session via onAuthStateChange
-          navigate('/feed');
-          return;
-        }
-
-        // Supabase failed — fall back to mock store (for admin/demo accounts)
-        const res = login(form.login.trim(), form.password);
-        setLoading(false);
-        if (res.error) {
-          setError('Неверный логин или пароль');
-        } else {
-          navigate('/feed');
-        }
-        return;
-      }
-
-      // No Supabase — mock store only
+    setTimeout(() => {
       const res = login(form.login.trim(), form.password);
       setLoading(false);
       if (res.error) setError(res.error);
       else navigate('/feed');
-
-    } catch (err) {
-      setError('Ошибка соединения. Попробуйте ещё раз.');
-      setLoading(false);
-    }
+    }, 300);
   };
 
   return (
@@ -72,25 +38,16 @@ export default function Login() {
 
         <div className="field">
           <label>Логин</label>
-          <input
-            className="input"
-            value={form.login}
-            autoFocus
-            autoComplete="username"
+          <input className="input" value={form.login} autoFocus autoComplete="username"
             onChange={(e) => setForm({ ...form, login: e.target.value })}
-            placeholder="aizada_k"
-          />
+            placeholder="aizada_k" />
         </div>
         <div className="field">
           <label>Пароль</label>
-          <input
-            className="input"
-            type="password"
-            value={form.password}
+          <input className="input" type="password" value={form.password}
             autoComplete="current-password"
             onChange={(e) => setForm({ ...form, password: e.target.value })}
-            placeholder="••••••••"
-          />
+            placeholder="••••••••" />
         </div>
 
         <Button type="submit" variant="primary" className="btn-block" loading={loading}>Войти</Button>
