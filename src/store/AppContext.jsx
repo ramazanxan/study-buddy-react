@@ -160,6 +160,9 @@ function reducer(state, action) {
     case 'REMOVE_ANNOUNCEMENT':
       return { ...state, announcements: state.announcements.filter((a) => a.id !== action.id) };
 
+    case 'DELETE_USER':
+      return { ...state, users: state.users.filter((u) => u.id !== action.id) };
+
     default:
       return state;
   }
@@ -642,6 +645,10 @@ export function AppProvider({ children }) {
     if (u) dispatch({ type: 'UPDATE_USER', user: { ...u, isBanned: false } });
   }, [state.users]);
 
+  const deleteUser = useCallback((userId) => {
+    dispatch({ type: 'DELETE_USER', id: userId });
+  }, []);
+
   const getUser = useCallback((id) => state.users.find((u) => u.id === id), [state.users]);
 
   // ── Bulk import ──────────────────────────────────────────────
@@ -732,7 +739,7 @@ export function AppProvider({ children }) {
     // announcements
     addAnnouncement, updateAnnouncement, removeAnnouncement,
     // admin
-    grantBadge, banUser, unbanUser,
+    grantBadge, banUser, unbanUser, deleteUser,
     getUser, toggleModerator, importUsers,
   };
 

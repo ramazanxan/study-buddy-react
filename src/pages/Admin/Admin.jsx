@@ -203,15 +203,53 @@ function DashboardSection() {
   );
 }
 
+// ── ADD USER MODAL ─────────────────────────────────────
+function AddUserModal({ onAdd, onClose }) {
+  const [form, setForm] = useState({ login: '', fullName: '', faculty: '', course: 1, age: 18, password: 'pass123', role: 'student' });
+  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+  const submit = () => {
+    if (!form.login.trim() || !form.fullName.trim()) return;
+    onAdd(form);
+    onClose();
+  };
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+        <h3 style={{ marginBottom: 16 }}>➕ Добавить пользователя</h3>
+        <div className="form-group"><label className="label">Логин</label><input className="input" value={form.login} onChange={(e) => set('login', e.target.value)} placeholder="ivanov" /></div>
+        <div className="form-group" style={{ marginTop: 10 }}><label className="label">ФИО</label><input className="input" value={form.fullName} onChange={(e) => set('fullName', e.target.value)} placeholder="Иван Иванов" /></div>
+        <div className="form-group" style={{ marginTop: 10 }}><label className="label">Институт</label><input className="input" value={form.faculty} onChange={(e) => set('faculty', e.target.value)} placeholder="ИИТ" /></div>
+        <div className="admin-form-row" style={{ marginTop: 10 }}>
+          <div className="form-group"><label className="label">Курс</label><input className="input" type="number" min={1} max={5} value={form.course} onChange={(e) => set('course', e.target.value)} /></div>
+          <div className="form-group"><label className="label">Возраст</label><input className="input" type="number" min={14} max={80} value={form.age} onChange={(e) => set('age', e.target.value)} /></div>
+        </div>
+        <div className="form-group" style={{ marginTop: 10 }}><label className="label">Пароль</label><input className="input" value={form.password} onChange={(e) => set('password', e.target.value)} /></div>
+        <div className="form-group" style={{ marginTop: 10 }}>
+          <label className="label">Роль</label>
+          <select className="input" value={form.role} onChange={(e) => set('role', e.target.value)}>
+            <option value="student">Студент</option>
+            <option value="mentor">Наставник</option>
+          </select>
+        </div>
+        <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
+          <Button variant="primary" onClick={submit}>Добавить</Button>
+          <Button variant="secondary" onClick={onClose}>Отмена</Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── STUDENTS ───────────────────────────────────────────
 const PAGE_SIZE = 10;
 function StudentsSection() {
-  const { users, banUser, unbanUser, grantBadge, toggleModerator } = useApp();
+  const { users, banUser, unbanUser, grantBadge, toggleModerator, deleteUser, importUsers, register } = useApp();
   const [search, setSearch] = useState('');
   const [faculty, setFaculty] = useState('');
   const [course, setCourse] = useState('');
   const [status, setStatus] = useState('all');
   const [page, setPage] = useState(0);
+  const [showAdd, setShowAdd] = useState(false);
   const [toast, showToast, clearToast] = useToast();
 
   const faculties = useMemo(() => [...new Set(users.filter(u => u.role !== 'admin').map(u => u.faculty))], [users]);
@@ -229,10 +267,26 @@ function StudentsSection() {
   const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const pageUsers = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
+  const handleAdd = (form) => {
+    const result = importUsers([form]);
+    if (result > 0) showToast(`✅ Пользователь @${form.login} добавлен`);
+    else showToast('Логин уже занят');
+  };
+
+  const handleDelete = (u) => {
+    if (!window.confirm(`Удалить пользователя ${u.fullName}? Это действие нельзя отменить.`)) return;
+    deleteUser(u.id);
+    showToast(`${u.fullName} удалён`);
+  };
+
   return (
     <>
       <Toast msg={toast} onDone={clearToast} />
+      {showAdd && <AddUserModal onAdd={handleAdd} onClose={() => setShowAdd(false)} />}
       <h2 className="admin-section-title">👨‍🎓 Студенты</h2>
+      <div style={{ marginBottom: 12 }}>
+        <Button variant="primary" onClick={() => setShowAdd(true)}>➕ Добавить пользователя</Button>
+      </div>
       <div className="admin-toolbar">
         <input className="input" placeholder="Поиск по ФИО, логину, группе..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(0); }} style={{ maxWidth: 280 }} />
         <select className="input" value={faculty} onChange={(e) => { setFaculty(e.target.value); setPage(0); }} style={{ maxWidth: 180 }}>
@@ -251,7 +305,7 @@ function StudentsSection() {
       </div>
       <div className="admin-table-wrap">
         <table className="admin-table">
-          <thead><tr><th></th><th>Логин</th><th>ФИО</th><th>Институт</th><th>Курс</th><th>Группа</th><th>Реп.</th><th>Статус</th><th>Действия</th></tr></thead>
+          <thead><tr><th></th><th>Логин</th><th>ФИО</th><th>Институт</th><th>Курс</th><th>Реп.</th><th>Статус</th><th>Действия</th></tr></thead>
           <tbody>
             {pageUsers.map((u) => (
               <tr key={u.id}>
@@ -260,7 +314,6 @@ function StudentsSection() {
                 <td>{u.fullName}</td>
                 <td>{u.faculty}</td>
                 <td>{u.course}</td>
-                <td>{u.groupName || '—'}</td>
                 <td><b style={{ color: 'var(--primary)' }}>{u.reputation}</b></td>
                 <td>
                   <span className={`status-chip ${u.isBanned ? 'banned' : u.role === 'mentor' || u.isMentor ? 'mentor' : 'active'}`}>
@@ -268,20 +321,18 @@ function StudentsSection() {
                   </span>
                 </td>
                 <td><div className="admin-actions">
-                  <Link to={`/profile/${u.id}`} className="act-btn primary">👁 Профиль</Link>
+                  <Link to={`/profile/${u.id}`} className="act-btn primary">👁</Link>
                   {u.isBanned
-                    ? <button className="act-btn success" onClick={() => { unbanUser(u.id); showToast(`${u.fullName} разблокирован`); }}>✅ Разблокировать</button>
-                    : <button className="act-btn danger" onClick={() => { banUser(u.id); showToast(`${u.fullName} заблокирован`); }}>🚫 Заблокировать</button>}
-                  <button className="act-btn" onClick={() => { grantBadge(u.id, 'reliable_partner'); showToast(`Бейдж обновлён`); }}>
-                    {u.badges?.includes('reliable_partner') ? '🏅 −Партнёр' : '🏅 +Партнёр'}
+                    ? <button className="act-btn success" onClick={() => { unbanUser(u.id); showToast(`${u.fullName} разблокирован`); }}>✅</button>
+                    : <button className="act-btn danger" onClick={() => { banUser(u.id); showToast(`${u.fullName} заблокирован`); }}>🚫</button>}
+                  <button className="act-btn" onClick={() => { toggleModerator(u.id); showToast(u.isModerator || u.role==='moderator' ? `Снят с модерации` : `Теперь модератор`); }}>
+                    {u.isModerator || u.role === 'moderator' ? '🛡️−' : '🛡️+'}
                   </button>
-                  <button className="act-btn" onClick={() => { toggleModerator(u.id); showToast(u.isModerator || u.role==='moderator' ? `${u.fullName} снят с модерации` : `${u.fullName} — теперь модератор`); }}>
-                    {u.isModerator || u.role === 'moderator' ? '🛡️ −Модератор' : '🛡️ +Модератор'}
-                  </button>
+                  <button className="act-btn danger" onClick={() => handleDelete(u)}>🗑</button>
                 </div></td>
               </tr>
             ))}
-            {pageUsers.length === 0 && <tr><td colSpan={9} style={{ textAlign:'center', color:'var(--text-muted)', padding: 32 }}>Нет результатов</td></tr>}
+            {pageUsers.length === 0 && <tr><td colSpan={8} style={{ textAlign:'center', color:'var(--text-muted)', padding: 32 }}>Нет результатов</td></tr>}
           </tbody>
         </table>
       </div>
@@ -299,15 +350,25 @@ function StudentsSection() {
 
 // ── MENTORS ────────────────────────────────────────────
 function MentorsSection() {
-  const { users, mentorships, banUser, unbanUser } = useApp();
+  const { users, mentorships, banUser, unbanUser, deleteUser, importUsers } = useApp();
   const [toast, showToast, clearToast] = useToast();
+  const [showAdd, setShowAdd] = useState(false);
   const mentors = users.filter((u) => u.isMentor || u.role === 'mentor');
+
+  const handleDelete = (u) => {
+    if (!window.confirm(`Удалить наставника ${u.fullName}?`)) return;
+    deleteUser(u.id);
+    showToast(`${u.fullName} удалён`);
+  };
 
   return (
     <>
       <Toast msg={toast} onDone={clearToast} />
+      {showAdd && <AddUserModal onAdd={(form) => { const n = importUsers([{ ...form, role: 'mentor' }]); showToast(n > 0 ? `Наставник добавлен` : 'Логин занят'); setShowAdd(false); }} onClose={() => setShowAdd(false)} />}
       <h2 className="admin-section-title">🧭 Наставники</h2>
-      <p className="admin-section-subtitle">Студенты с активным статусом наставника (Агай / Эже)</p>
+      <div style={{ marginBottom: 12 }}>
+        <Button variant="primary" onClick={() => setShowAdd(true)}>➕ Добавить наставника</Button>
+      </div>
       <div className="admin-table-wrap">
         <table className="admin-table">
           <thead><tr><th></th><th>Логин</th><th>ФИО</th><th>Институт</th><th>Курс</th><th>Подопечных</th><th>Статус</th><th>Действия</th></tr></thead>
@@ -324,10 +385,11 @@ function MentorsSection() {
                   <td><b>{menteeCount}</b></td>
                   <td><span className={`status-chip ${u.isBanned ? 'banned' : 'mentor'}`}>{u.isBanned ? 'Заблокирован' : 'Наставник'}</span></td>
                   <td><div className="admin-actions">
-                    <Link to={`/profile/${u.id}`} className="act-btn primary">👁 Профиль</Link>
+                    <Link to={`/profile/${u.id}`} className="act-btn primary">👁</Link>
                     {u.isBanned
-                      ? <button className="act-btn success" onClick={() => { unbanUser(u.id); showToast(`${u.fullName} разблокирован`); }}>✅ Разблокировать</button>
-                      : <button className="act-btn danger" onClick={() => { banUser(u.id); showToast(`${u.fullName} заблокирован`); }}>🚫 Заблокировать</button>}
+                      ? <button className="act-btn success" onClick={() => { unbanUser(u.id); showToast(`Разблокирован`); }}>✅</button>
+                      : <button className="act-btn danger" onClick={() => { banUser(u.id); showToast(`Заблокирован`); }}>🚫</button>}
+                    <button className="act-btn danger" onClick={() => handleDelete(u)}>🗑</button>
                   </div></td>
                 </tr>
               );
@@ -342,26 +404,45 @@ function MentorsSection() {
 
 // ── MODERATORS ─────────────────────────────────────────
 function ModeratorsSection() {
+  const { users, toggleModerator, deleteUser, importUsers } = useApp();
   const [toast, showToast, clearToast] = useToast();
-  const MODS = [
-    { name: 'Асел Токтосунова', sections: 'Лента, Маркетплейс', last: 'Онлайн сейчас' },
-    { name: 'Нурбек Кадыров', sections: 'Доска побед, Чаты', last: '2 часа назад' },
-  ];
+  const [showAdd, setShowAdd] = useState(false);
+  const mods = users.filter((u) => u.role === 'moderator' || u.isModerator);
+
+  const handleDelete = (u) => {
+    if (!window.confirm(`Удалить модератора ${u.fullName}?`)) return;
+    deleteUser(u.id);
+    showToast(`${u.fullName} удалён`);
+  };
+
   return (
     <>
       <Toast msg={toast} onDone={clearToast} />
+      {showAdd && <AddUserModal onAdd={(form) => { const n = importUsers([form]); if (n > 0) { const created = users.find(u => u.login === form.login); if (created) toggleModerator(created.id); showToast('Модератор добавлен'); } else showToast('Логин занят'); setShowAdd(false); }} onClose={() => setShowAdd(false)} />}
       <h2 className="admin-section-title">🛡️ Модераторы</h2>
-      <div style={{ marginBottom: 20 }}>
-        <Button variant="primary" onClick={() => showToast('Функция скоро будет доступна')}>+ Добавить модератора</Button>
+      <div style={{ marginBottom: 16 }}>
+        <Button variant="primary" onClick={() => setShowAdd(true)}>➕ Добавить модератора</Button>
       </div>
-      <div className="mod-grid">
-        {MODS.map((m, i) => (
-          <div key={i} className="mod-card">
-            <div className="mod-name">{m.name}</div>
-            <div className="mod-section">📋 Разделы: {m.sections}</div>
-            <div className="mod-last">🟢 {m.last}</div>
-          </div>
-        ))}
+      <div className="admin-table-wrap">
+        <table className="admin-table">
+          <thead><tr><th></th><th>Логин</th><th>ФИО</th><th>Институт</th><th>Действия</th></tr></thead>
+          <tbody>
+            {mods.map((u) => (
+              <tr key={u.id}>
+                <td><Avatar user={u} size="sm" /></td>
+                <td style={{ fontWeight: 600 }}>@{u.login}</td>
+                <td>{u.fullName}</td>
+                <td>{u.faculty}</td>
+                <td><div className="admin-actions">
+                  <Link to={`/profile/${u.id}`} className="act-btn primary">👁</Link>
+                  <button className="act-btn" onClick={() => { toggleModerator(u.id); showToast(`${u.fullName} снят с модерации`); }}>🛡️ Снять</button>
+                  <button className="act-btn danger" onClick={() => handleDelete(u)}>🗑</button>
+                </div></td>
+              </tr>
+            ))}
+            {mods.length === 0 && <tr><td colSpan={5} style={{ textAlign:'center', color:'var(--text-muted)', padding: 32 }}>Нет модераторов</td></tr>}
+          </tbody>
+        </table>
       </div>
     </>
   );
