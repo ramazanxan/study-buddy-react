@@ -46,10 +46,15 @@ export default function Chat() {
     return () => document.removeEventListener('visibilitychange', onVisible);
   }, [activeConvId, markRead]);
 
-  const myConvs = useMemo(
-    () => conversations.filter((c) => c.participants.includes(currentUser.id)),
-    [conversations, currentUser.id]
-  );
+  const myConvs = useMemo(() => {
+    const list = conversations.filter((c) => c.participants.includes(currentUser.id));
+    // Если активный чат не попал в список (race condition) — добавляем его
+    if (activeConvId && !list.find((c) => c.id === activeConvId)) {
+      const active = conversations.find((c) => c.id === activeConvId);
+      if (active) return [active, ...list];
+    }
+    return list;
+  }, [conversations, currentUser.id, activeConvId]);
 
   // set first conv as active if none selected
   useEffect(() => {
