@@ -91,10 +91,10 @@ const NAV = [
 // ── Root ───────────────────────────────────────────────
 export default function Admin() {
   const { currentUser } = useApp();
-  if (!currentUser || currentUser.role !== 'admin') return <Navigate to="/feed" replace />;
-
   const [section, setSection] = useState('dashboard');
   const allItems = NAV.flatMap((g) => g.items);
+
+  if (!currentUser || currentUser.role !== 'admin') return <Navigate to="/feed" replace />;
 
   return (
     <div className="admin-page">
