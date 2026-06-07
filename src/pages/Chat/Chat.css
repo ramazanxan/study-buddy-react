@@ -510,21 +510,8 @@
 
 /* Mobile */
 @media (max-width: 700px) {
-  .chat-page {
-    padding-top: var(--navbar-h);
-    height: 100dvh;
-  }
-  .chat-layout {
-    height: calc(100dvh - var(--navbar-h));
-  }
   .chat-sidebar { width: 100%; }
   .chat-sidebar.hidden-mobile { display: none; }
   .chat-window.hidden-mobile { display: none; }
   .chat-back { display: flex; }
-  .chat-messages {
-    padding-bottom: 8px;
-  }
-  .chat-input-area {
-    padding-bottom: max(12px, env(safe-area-inset-bottom));
-  }
 }
