@@ -257,13 +257,13 @@
     overflow-x: scroll;
     overflow-y: visible;
     -webkit-overflow-scrolling: touch;
-    gap: 6px;
-    padding: 10px 12px;
-    background: var(--bg-card);
-    border-bottom: 2px solid var(--border);
+    gap: 8px;
+    padding: 10px 14px;
+    background: #F0FBE6;
+    border-bottom: 2px solid #5DBB2A;
     scrollbar-width: none;
-    min-height: 70px;
-    align-items: stretch;
+    min-height: 76px;
+    align-items: center;
   }
   .admin-mtabs::-webkit-scrollbar { display: none; }
 
@@ -273,23 +273,23 @@
     align-items: center;
     justify-content: center;
     gap: 3px;
-    padding: 8px 12px;
-    min-width: 70px;
+    padding: 8px 14px;
+    min-width: 72px;
     flex-shrink: 0;
     border-radius: 10px;
-    border: 1.5px solid var(--border);
-    background: var(--bg-muted);
-    color: var(--text-muted);
+    border: 2px solid #5DBB2A;
+    background: #fff;
+    color: #3A8A18;
     cursor: pointer;
     font-family: var(--font-body);
     -webkit-tap-highlight-color: transparent;
-    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    transition: background 0.15s, color 0.15s;
   }
   .admin-mtab.active {
-    background: var(--primary) !important;
-    border-color: var(--primary) !important;
+    background: #5DBB2A !important;
+    border-color: #5DBB2A !important;
     color: #fff !important;
-    box-shadow: 0 2px 8px rgba(93,187,42,0.35);
+    box-shadow: 0 2px 10px rgba(93,187,42,0.40);
   }
 }
 
