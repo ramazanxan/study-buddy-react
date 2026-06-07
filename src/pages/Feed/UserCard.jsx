@@ -26,6 +26,7 @@ export default function UserCard({ user, onMatch, readOnly = false }) {
 
   const handleMessage = () => {
     const conv = getOrCreateConversation(user.id);
+    if (!conv) return;
     navigate('/chat', { state: { convId: conv.id } });
   };
 
