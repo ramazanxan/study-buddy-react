@@ -11,7 +11,7 @@ export default function Chat() {
   const {
     currentUser, users, conversations, messages,
     getUser, getOrCreateConversation, getConversationId,
-    sendMessage, markRead, unreadCount,
+    sendMessage, markRead,
     isOnline, getLastSeen, pingOnline,
   } = useApp();
   const location = useLocation();
@@ -64,7 +64,10 @@ export default function Chat() {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, activeConvId]);
 
-  const activeConv = myConvs.find((c) => c.id === activeConvId);
+  const activeConv = useMemo(
+    () => conversations.find((c) => c.id === activeConvId),
+    [conversations, activeConvId]
+  );
   const otherId = activeConv?.participants.find((p) => p !== currentUser.id);
   const other = otherId ? getUser(otherId) : null;
   const thread = activeConvId ? messages[activeConvId] || [] : [];
@@ -105,6 +108,7 @@ export default function Chat() {
 
   const startConversation = (userId) => {
     const conv = getOrCreateConversation(userId);
+    if (!conv) return;
     setActiveConvId(conv.id);
     setShowUserSearch(false);
     setUserSearchQ('');
@@ -248,7 +252,12 @@ export default function Chat() {
                 Написать кому-нибудь
               </button>
             </div>
-          ) : other ? (
+          ) : !other ? (
+            <div className="chat-placeholder">
+              <div className="chat-placeholder-icon">💬</div>
+              <p>Открываем чат...</p>
+            </div>
+          ) : (
             <>
               {/* Header */}
               <div className="chat-header">
@@ -360,7 +369,7 @@ export default function Chat() {
                 </button>
               </form>
             </>
-          ) : null}
+          )}
         </section>
       </div>
     </div>
