@@ -28,12 +28,14 @@ export default function Chat() {
   const fileRef = useRef(null);
   const textRef = useRef(null);
 
-  // ping online every minute
+  // ping online every minute — use ref to avoid infinite loop
+  const pingRef = useRef(pingOnline);
+  pingRef.current = pingOnline;
   useEffect(() => {
-    pingOnline();
-    const t = setInterval(pingOnline, ONLINE_PING_MS);
+    pingRef.current();
+    const t = setInterval(() => pingRef.current(), ONLINE_PING_MS);
     return () => clearInterval(t);
-  }, [pingOnline]);
+  }, []);
 
   // Fix: re-sync when user switches back to this browser tab
   useEffect(() => {
