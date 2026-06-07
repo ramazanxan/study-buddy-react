@@ -65,11 +65,6 @@ export default function Chat() {
     if (activeConvId) markRead(activeConvId);
   }, [activeConvId, markRead]);
 
-  const threadLen = thread.length;
-  useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'auto' });
-  }, [threadLen, activeConvId]);
-
   const activeConv = useMemo(
     () => conversations.find((c) => c.id === activeConvId),
     [conversations, activeConvId]
@@ -77,6 +72,10 @@ export default function Chat() {
   const otherId = activeConv?.participants.find((p) => p !== currentUser.id);
   const other = otherId ? getUser(otherId) : null;
   const thread = activeConvId ? messages[activeConvId] || [] : [];
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: 'auto' });
+  }, [thread.length, activeConvId]);
 
   const otherOnline = otherId ? isOnline(otherId) : false;
   const otherLastSeen = otherId ? getLastSeen(otherId) : null;
