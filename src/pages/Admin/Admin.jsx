@@ -238,6 +238,10 @@ function AddUserModal({ onAdd, onClose }) {
         </div>
         <div className="form-group" style={{ marginTop: 10 }}><label className="label">Пароль</label><input className="input" value={form.password} onChange={(e) => set('password', e.target.value)} /></div>
         <div className="form-group" style={{ marginTop: 10 }}>
+          <label className="label">О себе</label>
+          <textarea className="textarea" rows={2} placeholder="Интересы, цели, чем занимается..." value={form.about || ''} onChange={(e) => set('about', e.target.value)} />
+        </div>
+        <div className="form-group" style={{ marginTop: 10 }}>
           <label className="label">Роль</label>
           <select className="input" value={form.role} onChange={(e) => set('role', e.target.value)}>
             <option value="student">Студент</option>
