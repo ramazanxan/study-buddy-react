@@ -7,25 +7,17 @@ const COURSES = [1, 2, 3, 4, 5];
 export default function FilterPanel({ filters, setFilters }) {
   const [open, setOpen] = useState(false);
 
-  const toggleFaculty = (id) =>
-    setFilters((f) => ({
-      ...f,
-      faculties: (f.faculties || []).includes(id)
-        ? f.faculties.filter((x) => x !== id)
-        : [...(f.faculties || []), id],
-      directions: [],
-    }));
+  const selectedFaculty = filters.faculty || '';
+  const selectedDirection = filters.direction || '';
+  const facultyData = KGTU_FACULTIES.find((f) => f.id === selectedFaculty);
+  const directions = facultyData ? facultyData.directions : [];
 
-  const toggleDir = (d) =>
-    setFilters((f) => ({ ...f, directions: f.directions.includes(d) ? f.directions.filter((x) => x !== d) : [...f.directions, d] }));
+  const setFaculty = (id) => setFilters((f) => ({ ...f, faculty: id, direction: '' }));
+  const setDirection = (d) => setFilters((f) => ({ ...f, direction: d }));
   const toggleCourse = (c) =>
     setFilters((f) => ({ ...f, courses: f.courses.includes(c) ? f.courses.filter((x) => x !== c) : [...f.courses, c] }));
 
-  const reset = () => setFilters({ faculties: [], directions: [], courses: [], ageFrom: '', ageTo: '', search: '', sparkOnly: false });
-
-  const selectedFaculties = filters.faculties || [];
-  const selectedFacultyData = KGTU_FACULTIES.filter((f) => selectedFaculties.includes(f.id));
-  const directions = [...new Set(selectedFacultyData.flatMap((f) => f.directions))];
+  const reset = () => setFilters({ faculty: '', direction: '', courses: [], ageFrom: '', ageTo: '', search: '', sparkOnly: false });
 
   return (
     <>
@@ -41,22 +33,23 @@ export default function FilterPanel({ filters, setFilters }) {
 
         <div className="fp-section">
           <label className="fp-label">Институт</label>
-          <div className="fp-chips">
+          <select className="input" value={selectedFaculty} onChange={(e) => setFaculty(e.target.value)}>
+            <option value="">Все институты</option>
             {KGTU_FACULTIES.map((f) => (
-              <button key={f.id} className={`chip ${selectedFaculties.includes(f.id) ? 'active' : ''}`}
-                onClick={() => toggleFaculty(f.id)}>{f.name}</button>
+              <option key={f.id} value={f.id}>{f.name}</option>
             ))}
-          </div>
+          </select>
         </div>
 
-        {selectedFaculties.length > 0 && (
+        {selectedFaculty && (
           <div className="fp-section">
             <label className="fp-label">Направление</label>
-            <div className="fp-chips">
+            <select className="input" value={selectedDirection} onChange={(e) => setDirection(e.target.value)}>
+              <option value="">Все направления</option>
               {directions.map((d) => (
-                <button key={d} className={`chip ${filters.directions.includes(d) ? 'active' : ''}`} onClick={() => toggleDir(d)}>{d}</button>
+                <option key={d} value={d}>{d}</option>
               ))}
-            </div>
+            </select>
           </div>
         )}
 
