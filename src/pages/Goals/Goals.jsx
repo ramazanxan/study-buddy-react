@@ -268,9 +268,15 @@ function PactsTab({ app }) {
   const [text, setText] = useState('');
   const [deadline, setDeadline] = useState('');
 
+  const { users } = app;
   const myMatches = matches.filter((m) => m.users.includes(currentUser.id));
-  const partnerOptions = myMatches.map((m) => getUser(m.users.find((u) => u !== currentUser.id))).filter(Boolean);
+  const matchPartners = myMatches.map((m) => getUser(m.users.find((u) => u !== currentUser.id))).filter(Boolean);
+  // Если мэтчей нет — даём выбрать любого студента, чтобы пакт можно было создать
+  const allStudents = (users || []).filter((u) => u.id !== currentUser.id && u.role !== 'admin' && !u.isBanned);
+  const partnerOptions = matchPartners.length ? matchPartners : allStudents;
   const myPacts = pacts.filter((p) => p.users.includes(currentUser.id));
+  const activeCount = myPacts.filter((p) => p.status === 'active').length;
+  const doneCount = myPacts.filter((p) => p.status === 'done').length;
 
   const create = (e) => {
     e.preventDefault();
@@ -283,12 +289,23 @@ function PactsTab({ app }) {
     <div className="tab-content">
       <form className="card pact-form" onSubmit={create}>
         <h3>Создать пакт</h3>
+        {myPacts.length > 0 && (
+          <div className="pact-stats" style={{ display: 'flex', gap: 16, marginBottom: 12, fontSize: 13, color: 'var(--text-muted)' }}>
+            <span>🔥 Активных: <b style={{ color: 'var(--primary)' }}>{activeCount}</b></span>
+            <span>✅ Выполнено: <b style={{ color: 'var(--success)' }}>{doneCount}</b></span>
+          </div>
+        )}
         <div className="field">
           <label>Партнёр</label>
           <select className="select" value={partner} onChange={(e) => setPartner(e.target.value)}>
-            <option value="">Выбери из мэтчей...</option>
-            {partnerOptions.map((u) => <option key={u.id} value={u.id}>{u.fullName}</option>)}
+            <option value="">{matchPartners.length ? 'Выбери из мэтчей...' : 'Выбери студента...'}</option>
+            {partnerOptions.map((u) => <option key={u.id} value={u.id}>{u.fullName}{u.faculty ? ` · ${u.faculty}` : ''}</option>)}
           </select>
+          {!matchPartners.length && (
+            <div className="field-hint" style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
+              У тебя пока нет мэтчей — можешь заключить пакт с любым студентом.
+            </div>
+          )}
         </div>
         <div className="field"><label>Цель пакта</label>
           <input className="input" value={text} placeholder="Например: каждый день учить новые слова" onChange={(e) => setText(e.target.value)} /></div>

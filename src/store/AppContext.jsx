@@ -205,6 +205,7 @@ export function AppProvider({ children }) {
       login: meta.login || sbUser.email,
       email: sbUser.email,
       fullName: meta.full_name || '',
+      fullNameEn: meta.full_name_en || '',
       faculty: meta.faculty || '',
       direction: meta.direction || '',
       groupName: meta.group_name || '—',
@@ -238,6 +239,7 @@ export function AppProvider({ children }) {
         id:         p.id,
         login:      p.login,
         fullName:   p.full_name || '',
+        fullNameEn: p.full_name_en || '',
         faculty:    p.faculty || '',
         direction:  p.direction || '',
         groupName:  p.group_name || '—',
@@ -642,6 +644,44 @@ export function AppProvider({ children }) {
 
   const getUser = useCallback((id) => state.users.find((u) => u.id === id), [state.users]);
 
+  // ── Bulk import ──────────────────────────────────────────────
+  const importUsers = useCallback((usersData) => {
+    let count = 0;
+    for (const d of usersData) {
+      if (!d.login) continue;
+      const exists = state.users.some((u) => u.login.toLowerCase() === d.login.toLowerCase());
+      if (exists) continue;
+      const user = {
+        id: uid('u'),
+        login: d.login,
+        passwordHash: hashPassword(d.password || 'pass123'),
+        fullName: d.fullName || d.login,
+        faculty: d.faculty || '',
+        direction: d.direction || '',
+        groupName: '—',
+        course: Number(d.course) || 1,
+        age: Number(d.age) || 18,
+        photo: null,
+        interests: [],
+        about: d.about || '',
+        goal: '',
+        role: 'student',
+        reputation: 0,
+        badges: [],
+        isBanned: false,
+        createdAt: new Date().toISOString(),
+        isMentor: false,
+        lastSeen: new Date().toISOString(),
+        mentorBio: '',
+        mentorSubjects: [],
+        maxMentees: 5,
+      };
+      dispatch({ type: 'ADD_USER', user });
+      count++;
+    }
+    return count;
+  }, [state.users]);
+
   // ── Moderator ────────────────────────────────────────────────
   const toggleModerator = useCallback((userId) => {
     const u = state.users.find((x) => x.id === userId);
@@ -693,7 +733,7 @@ export function AppProvider({ children }) {
     addAnnouncement, updateAnnouncement, removeAnnouncement,
     // admin
     grantBadge, banUser, unbanUser,
-    getUser, toggleModerator,
+    getUser, toggleModerator, importUsers,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

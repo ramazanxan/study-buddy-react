@@ -10,12 +10,13 @@ import './Feed.css';
 export default function Feed() {
   const { currentUser, users } = useApp();
   const isAdmin = currentUser.role === 'admin';
-  const [filters, setFilters] = useState({ directions: [], courses: [], ageFrom: '', ageTo: '', search: '', sparkOnly: false });
+  const [filters, setFilters] = useState({ faculties: [], directions: [], courses: [], ageFrom: '', ageTo: '', search: '', sparkOnly: false });
   const [match, setMatch] = useState(null);
 
   const list = useMemo(() => {
     return users
       .filter((u) => u.id !== currentUser.id && u.role !== 'admin' && !u.isBanned)
+      .filter((u) => (filters.faculties?.length ? filters.faculties.includes(u.faculty) : true))
       .filter((u) => (filters.directions.length ? filters.directions.includes(u.direction) : true))
       .filter((u) => (filters.courses.length ? filters.courses.includes(u.course) : true))
       .filter((u) => (filters.ageFrom ? u.age >= Number(filters.ageFrom) : true))

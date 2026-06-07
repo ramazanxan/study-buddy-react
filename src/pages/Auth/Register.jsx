@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../../store/AppContext';
 import { KGTU_FACULTIES } from '../../store/mockData';
 import Button from '../../components/common/Button';
+import { supabase } from '../../lib/supabase';
 import {
   validateLogin, validatePassword, validateName, validateAge,
   getPasswordStrength, passwordCriteria,
@@ -12,6 +13,8 @@ import './Auth.css';
 const CRITERIA_LABELS = [
   ['length', '8+ символов'], ['upper', 'Заглавная'], ['lower', 'Строчная'], ['digit', 'Цифра'],
 ];
+
+const toEmail = (login) => `${login.toLowerCase().trim()}@studybuddy.kg`;
 
 export default function Register() {
   const { register } = useApp();
@@ -26,10 +29,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
-
-  const setFaculty = (id) => {
-    setForm((f) => ({ ...f, faculty: id, direction: '' }));
-  };
+  const setFaculty = (id) => setForm((f) => ({ ...f, faculty: id, direction: '' }));
 
   const currentFaculty = KGTU_FACULTIES.find((f) => f.id === form.faculty) || KGTU_FACULTIES[0];
   const crit = passwordCriteria(form.password);
@@ -47,21 +47,116 @@ export default function Register() {
     return Object.keys(e).length === 0;
   };
 
-  const submit = (ev) => {
+  const submit = async (ev) => {
     ev.preventDefault();
     setServerError('');
+
+    // Проверяем настройку "Регистрация открыта" из админ-панели
+    try {
+      const settings = JSON.parse(localStorage.getItem('studybuddy_settings') || '{}');
+      if (settings.regOpen === false) {
+        setServerError('Регистрация временно закрыта администратором.');
+        return;
+      }
+    } catch { /* ignore */ }
+
     if (!validate()) return;
     setLoading(true);
-    setTimeout(() => {
-      const res = register({
-        ...form,
-        direction: form.direction || currentFaculty.directions[0],
-        role: role === 'mentor' ? 'mentor' : 'student',
-      });
+
+    const direction = form.direction || currentFaculty.directions[0];
+    const userRole  = role === 'mentor' ? 'mentor' : 'student';
+
+    try {
+      if (supabase) {
+        const email = toEmail(form.login);
+
+        // 1. Create Supabase auth user (требует "Confirm email" = OFF в Supabase)
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password: form.password,
+          options: {
+            data: {
+              login: form.login,
+              full_name: form.fullName,
+              faculty: form.faculty, direction,
+              group_name: '—', course: Number(form.course) || 1,
+              age: Number(form.age), about: form.about || '',
+              role: userRole, is_mentor: role === 'mentor',
+            },
+          },
+        });
+
+        if (error) {
+          const m = error.message || '';
+          if (m.includes('already registered') || m.includes('already exists') || m.includes('User already')) {
+            setServerError('Этот логин уже занят. Выбери другой.');
+          } else if (m.toLowerCase().includes('password')) {
+            setServerError('Пароль слишком простой. Минимум 6 символов.');
+          } else {
+            setServerError('Ошибка регистрации: ' + m);
+          }
+          setLoading(false);
+          return;
+        }
+
+        if (!data.user) {
+          setServerError('Не удалось создать аккаунт. Попробуй ещё раз.');
+          setLoading(false);
+          return;
+        }
+
+        // 2. Сохраняем профиль в общую таблицу profiles (виден всем устройствам).
+        //    Ошибку показываем явно — раньше она глоталась, и юзер был невидим.
+        const { error: profErr } = await supabase.from('profiles').upsert({
+          id:           data.user.id,
+          login:        form.login,
+          full_name:    form.fullName,
+          faculty:      form.faculty,
+          direction,
+          group_name:   '—',
+          course:       Number(form.course) || 1,
+          age:          Number(form.age),
+          about:        form.about || '',
+          goal:         '',
+          role:         userRole,
+          is_mentor:    role === 'mentor',
+          is_moderator: false,
+          reputation:   0,
+          badges:       [],
+          interests:    [],
+          is_banned:    false,
+        }, { onConflict: 'id' });
+
+        if (profErr) {
+          setServerError('Профиль не сохранился: ' + profErr.message + '. Проверь, что выполнен schema.sql.');
+          setLoading(false);
+          return;
+        }
+
+        // 3. signUp с выключенным подтверждением уже создаёт сессию.
+        //    Если её нет — пробуем войти; если и это не вышло — на страницу входа.
+        if (data.session) {
+          setLoading(false);
+          navigate('/feed');
+          return;
+        }
+        const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password: form.password });
+        setLoading(false);
+        if (!signInErr) navigate('/feed');
+        else { setServerError('Аккаунт создан! Войди со своим логином и паролем.'); setTimeout(() => navigate('/login'), 1800); }
+        return;
+      }
+
+      // Fallback: mock store (no Supabase configured)
+      const res = register({ ...form, direction, role: userRole });
       setLoading(false);
       if (res.error) setServerError(res.error);
       else navigate('/feed');
-    }, 350);
+
+    } catch (err) {
+      setServerError('Ошибка соединения: ' + (err?.message || 'попробуйте ещё раз'));
+      setLoading(false);
+    }
   };
 
   return (
@@ -99,9 +194,9 @@ export default function Register() {
             </div>
 
             <div className="field">
-              <label>Имя</label>
+              <label>Имя и фамилия</label>
               <input className={`input ${errors.fullName ? 'has-error' : ''}`} value={form.fullName}
-                onChange={(e) => set('fullName', e.target.value)} placeholder="Айзада Кенжебаева" />
+                onChange={(e) => set('fullName', e.target.value)} placeholder="Айзада Кенжебаева / Aizada Kenzhebaeva" />
               {errors.fullName && <div className="field-error">{errors.fullName}</div>}
             </div>
 
@@ -115,8 +210,7 @@ export default function Register() {
             <div className="field">
               <label>Пароль</label>
               <input className={`input ${errors.password ? 'has-error' : ''}`} type="password" value={form.password}
-                onChange={(e) => set('password', e.target.value)} placeholder="••••••••"
-                autoComplete="new-password" />
+                onChange={(e) => set('password', e.target.value)} placeholder="••••••••" autoComplete="new-password" />
               {form.password && (
                 <>
                   <div className="strength-bar">
@@ -138,8 +232,7 @@ export default function Register() {
             <div className="field">
               <label>Повтор пароля</label>
               <input className={`input ${errors.confirm ? 'has-error' : ''}`} type="password" value={form.confirm}
-                onChange={(e) => set('confirm', e.target.value)} placeholder="••••••••"
-                autoComplete="new-password" />
+                onChange={(e) => set('confirm', e.target.value)} placeholder="••••••••" autoComplete="new-password" />
               {errors.confirm && <div className="field-error">{errors.confirm}</div>}
             </div>
           </div>

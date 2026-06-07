@@ -2,7 +2,10 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../../store/AppContext';
 import Button from '../../components/common/Button';
+import { supabase } from '../../lib/supabase';
 import './Auth.css';
+
+const isEmail = (v) => v.includes('@');
 
 export default function Login() {
   const { login } = useApp();
@@ -11,7 +14,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     setError('');
     if (!form.login.trim() || !form.password) {
@@ -19,12 +22,59 @@ export default function Login() {
       return;
     }
     setLoading(true);
-    setTimeout(() => {
+
+    try {
+      if (supabase) {
+        let email = form.login.trim().toLowerCase();
+
+        // Use the get_email_by_login RPC if user typed a username (not email)
+        if (!isEmail(email)) {
+          const { data: foundEmail, error: rpcErr } = await supabase
+            .rpc('get_email_by_login', { p_login: email });
+
+          if (!rpcErr && foundEmail) {
+            email = foundEmail;
+          } else {
+            // RPC returned nothing — might be mock/demo user, fall back to local store
+            const res = login(form.login.trim(), form.password);
+            setLoading(false);
+            if (res.error) setError('Пользователь не найден');
+            else navigate('/feed');
+            return;
+          }
+        }
+
+        const { error: authErr } = await supabase.auth.signInWithPassword({
+          email,
+          password: form.password,
+        });
+
+        if (!authErr) {
+          navigate('/feed');
+          return;
+        }
+
+        if (authErr.message.includes('Email not confirmed')) {
+          setError('Сначала отключи подтверждение email в Supabase Dashboard → Authentication → Providers → Email');
+        } else if (authErr.message.includes('Invalid login credentials')) {
+          setError('Неверный логин или пароль');
+        } else {
+          setError(authErr.message);
+        }
+        setLoading(false);
+        return;
+      }
+
+      // No Supabase — mock store only
       const res = login(form.login.trim(), form.password);
       setLoading(false);
       if (res.error) setError(res.error);
       else navigate('/feed');
-    }, 300);
+
+    } catch {
+      setError('Ошибка соединения. Попробуйте ещё раз.');
+      setLoading(false);
+    }
   };
 
   return (

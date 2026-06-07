@@ -17,7 +17,16 @@
       "PowerShell(gh auth status 2>&1)",
       "WebFetch(domain:kgtu.kg)",
       "WebFetch(domain:kgtu.edu.kg)",
-      "WebFetch(domain:www.kgtu.kg)"
+      "WebFetch(domain:www.kgtu.kg)",
+      "Bash(npx vite *)",
+      "Bash(npx eslint *)",
+      "Bash(pip install *)",
+      "Bash(pip3 install *)",
+      "Bash(python3 -m pip install python-pptx --quiet)",
+      "PowerShell(python -c \"import pptx; print\\(pptx.__version__\\)\")",
+      "PowerShell(\\(Get-Item \"C:\\\\Users\\\\user\\\\study-buddy-react\\\\StudyBuddy_Presentation.pptx\"\\).Length / 1KB)",
+      "Bash(npm install *)",
+      "Bash(npm run *)"
     ]
   }
 }

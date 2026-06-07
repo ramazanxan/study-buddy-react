@@ -6,26 +6,27 @@
 -- ── Таблицы ─────────────────────────────────────────────────────
 
 create table if not exists public.profiles (
-  id          uuid primary key references auth.users(id) on delete cascade,
-  login       text unique not null,
-  full_name   text not null,
-  faculty     text,
-  direction   text,
-  group_name  text,
-  course      int default 1,
-  age         int,
-  photo       text,
-  interests   text[] default '{}',
-  about       text default '',
-  goal        text default '',
-  role        text default 'student' check (role in ('student','mentor','moderator','admin')),
-  is_mentor   boolean default false,
+  id           uuid primary key references auth.users(id) on delete cascade,
+  login        text unique not null,
+  full_name    text not null,
+  full_name_en text default '',
+  faculty      text,
+  direction    text,
+  group_name   text,
+  course       int default 1,
+  age          int,
+  photo        text,
+  interests    text[] default '{}',
+  about        text default '',
+  goal         text default '',
+  role         text default 'student' check (role in ('student','mentor','moderator','admin')),
+  is_mentor    boolean default false,
   is_moderator boolean default false,
-  reputation  int default 0,
-  badges      text[] default '{}',
-  is_banned   boolean default false,
-  last_seen   timestamptz default now(),
-  created_at  timestamptz default now()
+  reputation   int default 0,
+  badges       text[] default '{}',
+  is_banned    boolean default false,
+  last_seen    timestamptz default now(),
+  created_at   timestamptz default now()
 );
 
 create table if not exists public.likes (
@@ -73,6 +74,9 @@ create table if not exists public.announcements (
   created_at timestamptz default now()
 );
 
+-- На случай, если таблица profiles уже существовала без новых колонок:
+alter table public.profiles add column if not exists full_name_en text default '';
+
 -- ── Row Level Security ───────────────────────────────────────────
 
 alter table public.profiles      enable row level security;
@@ -84,25 +88,24 @@ alter table public.announcements enable row level security;
 
 -- ── Удаляем старые политики (безопасно при повторном запуске) ───
 
-drop policy if exists "profiles readable by auth"     on public.profiles;
-drop policy if exists "profiles public login lookup"  on public.profiles;
-drop policy if exists "profiles self-insert"          on public.profiles;
-drop policy if exists "profiles self-update"          on public.profiles;
-drop policy if exists "likes readable"                on public.likes;
-drop policy if exists "likes insert own"              on public.likes;
-drop policy if exists "matches readable"              on public.matches;
-drop policy if exists "matches insert"                on public.matches;
-drop policy if exists "conv readable"                 on public.conversations;
-drop policy if exists "conv insert"                   on public.conversations;
-drop policy if exists "msg readable"                  on public.messages;
-drop policy if exists "msg insert own"                on public.messages;
-drop policy if exists "msg update read"               on public.messages;
-drop policy if exists "ann readable"                  on public.announcements;
-drop policy if exists "ann admin write"               on public.announcements;
+drop policy if exists "profiles readable by auth"    on public.profiles;
+drop policy if exists "profiles public login lookup" on public.profiles;
+drop policy if exists "profiles self-insert"         on public.profiles;
+drop policy if exists "profiles self-update"         on public.profiles;
+drop policy if exists "likes readable"               on public.likes;
+drop policy if exists "likes insert own"             on public.likes;
+drop policy if exists "matches readable"             on public.matches;
+drop policy if exists "matches insert"               on public.matches;
+drop policy if exists "conv readable"                on public.conversations;
+drop policy if exists "conv insert"                  on public.conversations;
+drop policy if exists "msg readable"                 on public.messages;
+drop policy if exists "msg insert own"               on public.messages;
+drop policy if exists "msg update read"              on public.messages;
+drop policy if exists "ann readable"                 on public.announcements;
+drop policy if exists "ann admin write"              on public.announcements;
 
 -- ── Создаём политики заново ──────────────────────────────────────
 
--- Profiles: все авторизованные читают; каждый пишет только свою строку
 create policy "profiles readable by auth"
   on public.profiles for select
   using (auth.role() = 'authenticated');
@@ -115,7 +118,6 @@ create policy "profiles self-update"
   on public.profiles for update
   using (auth.uid() = id);
 
--- Likes
 create policy "likes readable"
   on public.likes for select
   using (auth.role() = 'authenticated');
@@ -124,7 +126,6 @@ create policy "likes insert own"
   on public.likes for insert
   with check (auth.uid() = from_id);
 
--- Matches
 create policy "matches readable"
   on public.matches for select
   using (auth.role() = 'authenticated');
@@ -133,7 +134,6 @@ create policy "matches insert"
   on public.matches for insert
   with check (auth.role() = 'authenticated');
 
--- Conversations: только участники
 create policy "conv readable"
   on public.conversations for select
   using (auth.uid() = participant_a or auth.uid() = participant_b);
@@ -142,7 +142,6 @@ create policy "conv insert"
   on public.conversations for insert
   with check (auth.uid() = participant_a or auth.uid() = participant_b);
 
--- Messages: только участники диалога
 create policy "msg readable"
   on public.messages for select
   using (
@@ -167,7 +166,6 @@ create policy "msg update read"
     )
   );
 
--- Announcements: все читают; только admin пишет
 create policy "ann readable"
   on public.announcements for select
   using (true);
@@ -181,7 +179,7 @@ create policy "ann admin write"
     )
   );
 
--- ── RPC: найти email по логину ───────────────────────────────────
+-- ── RPC: найти email по логину (нужен для входа по логину) ───────
 
 create or replace function public.get_email_by_login(p_login text)
 returns text language sql security definer as $$
@@ -194,19 +192,14 @@ $$;
 
 grant execute on function public.get_email_by_login(text) to anon, authenticated;
 
--- ── Realtime (безопасно при повторном запуске) ───────────────────
+-- ── Realtime ─────────────────────────────────────────────────────
 
 do $$
 begin
-  begin
-    alter publication supabase_realtime add table public.messages;
+  begin alter publication supabase_realtime add table public.messages;
   exception when others then null; end;
-
-  begin
-    alter publication supabase_realtime add table public.conversations;
+  begin alter publication supabase_realtime add table public.conversations;
   exception when others then null; end;
-
-  begin
-    alter publication supabase_realtime add table public.announcements;
+  begin alter publication supabase_realtime add table public.announcements;
   exception when others then null; end;
 end $$;

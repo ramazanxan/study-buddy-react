@@ -1,10 +1,34 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { Link, Navigate } from 'react-router-dom';
+import * as XLSX from 'xlsx';
 import { useApp } from '../../store/AppContext';
 import Avatar from '../../components/common/Avatar';
 import Button from '../../components/common/Button';
 import { formatDate, truncate } from '../../utils/helpers';
 import './Admin.css';
+
+// ── Excel/CSV export — открывается в Excel, с BOM для кириллицы ──
+function exportToExcel(filename, rows) {
+  if (!rows.length) return;
+  const headers = Object.keys(rows[0]);
+  const escape = (v) => {
+    const s = v == null ? '' : String(v);
+    return /[",;\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+  const csv = [
+    headers.join(';'),
+    ...rows.map((r) => headers.map((h) => escape(r[h])).join(';')),
+  ].join('\r\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
 
 // ── Toast ──────────────────────────────────────────────
 function Toast({ msg, onDone }) {
@@ -533,30 +557,128 @@ function NotificationsSection() {
 }
 
 // ── FILES ──────────────────────────────────────────────
-function FilesSection() {
-  const [files, setFiles] = useState(MOCK_FILES);
-  const [toast, showToast, clearToast] = useToast();
+const FILES_KEY = 'studybuddy_admin_files';
+const iconFor = (name) => {
+  const ext = (name.split('.').pop() || '').toLowerCase();
+  if (['xls', 'xlsx', 'csv'].includes(ext)) return '📊';
+  if (['doc', 'docx'].includes(ext)) return '📋';
+  if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext)) return '🖼️';
+  if (ext === 'pdf') return '📄';
+  return '📁';
+};
 
-  const del = (id) => { setFiles(files.filter((f) => f.id !== id)); showToast('Файл удалён'); };
+function FilesSection() {
+  const { importUsers } = useApp();
+  const [files, setFiles] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(FILES_KEY)) || MOCK_FILES; }
+    catch { return MOCK_FILES; }
+  });
+  const [toast, showToast, clearToast] = useToast();
+  const fileRef = useRef(null);
+  const importRef = useRef(null);
+
+  const persist = (next) => {
+    setFiles(next);
+    try { localStorage.setItem(FILES_KEY, JSON.stringify(next)); } catch { /* quota */ }
+  };
+
+  const del = (id) => { persist(files.filter((f) => f.id !== id)); showToast('Файл удалён'); };
+
   const handleUpload = (e) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setFiles([{ id: 'f' + Date.now(), name: file.name, size: (file.size / 1024).toFixed(0) + ' КБ', date: new Date().toLocaleDateString('ru'), icon: '📄' }, ...files]);
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const entry = {
+        id: 'f' + Date.now(),
+        name: file.name,
+        size: file.size > 1024 * 1024
+          ? (file.size / 1024 / 1024).toFixed(1) + ' МБ'
+          : (file.size / 1024).toFixed(0) + ' КБ',
+        date: new Date().toLocaleDateString('ru'),
+        icon: iconFor(file.name),
+        data: reader.result,
+      };
+      persist([entry, ...files]);
       showToast(`Файл "${file.name}" загружен`);
-    }
+    };
+    reader.readAsDataURL(file);
     e.target.value = '';
+  };
+
+  const handleImport = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const wb = XLSX.read(ev.target.result, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws);
+        if (!rows.length) { showToast('Файл пустой'); return; }
+        const usersData = rows.map((r) => ({
+          login:    String(r['Логин']      || r['login']    || '').trim(),
+          fullName: String(r['Имя']        || r['ФИО']      || r['fullName'] || '').trim(),
+          faculty:  String(r['Институт']   || r['faculty']  || '').trim(),
+          direction:String(r['Направление']|| r['direction']|| '').trim(),
+          course:   r['Курс']    || r['course']   || 1,
+          age:      r['Возраст'] || r['age']      || 18,
+          password: String(r['Пароль']     || r['password'] || 'pass123').trim(),
+          about:    String(r['О себе']     || r['about']    || '').trim(),
+        }));
+        const count = importUsers(usersData);
+        showToast(`✅ Добавлено ${count} участников из "${file.name}"`);
+      } catch (err) {
+        showToast('Ошибка чтения файла: ' + err.message);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+    e.target.value = '';
+  };
+
+  const downloadTemplate = () => {
+    exportToExcel('шаблон_участников.csv', [{
+      Логин: 'ivanov', Имя: 'Иван Иванов', Институт: 'ИИТ',
+      Направление: 'Программная инженерия (ПИ)', Курс: 2,
+      Возраст: 20, Пароль: 'pass123', 'О себе': '',
+    }]);
+    showToast('Шаблон скачан — заполните и загрузите обратно');
+  };
+
+  const download = (f) => {
+    if (!f.data) { showToast('Это демо-файл без содержимого'); return; }
+    const a = document.createElement('a');
+    a.href = f.data;
+    a.download = f.name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   };
 
   return (
     <>
       <Toast msg={toast} onDone={clearToast} />
       <h2 className="admin-section-title">📁 Файлы</h2>
-      <label className="upload-zone" style={{ cursor: 'pointer', display: 'block' }}>
+
+      <div className="admin-form-card" style={{ margin: '0 0 20px' }}>
+        <h3>📥 Импорт участников из Excel</h3>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 14 }}>
+          Загрузите файл .xlsx или .csv со столбцами: <b>Логин, Имя, Институт, Направление, Курс, Возраст, Пароль, О себе</b>
+        </p>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <Button variant="primary" onClick={() => importRef.current?.click()}>📂 Загрузить файл участников</Button>
+          <Button variant="secondary" onClick={downloadTemplate}>📄 Скачать шаблон</Button>
+        </div>
+        <input ref={importRef} type="file" accept=".xlsx,.xls,.csv" style={{ display: 'none' }} onChange={handleImport} />
+      </div>
+
+      <div className="upload-zone" style={{ cursor: 'pointer' }} onClick={() => fileRef.current?.click()}>
         <div style={{ fontSize: 40, marginBottom: 8 }}>📤</div>
         <p>Перетащите файл сюда или нажмите для загрузки</p>
-        <Button variant="secondary" size="sm" onClick={(e) => e.preventDefault()}>Загрузить файл</Button>
-        <input type="file" style={{ display: 'none' }} onChange={handleUpload} />
-      </label>
+        <Button variant="secondary" size="sm" type="button" onClick={(e) => { e.stopPropagation(); fileRef.current?.click(); }}>Загрузить файл</Button>
+        <input ref={fileRef} type="file" style={{ display: 'none' }} onChange={handleUpload} />
+      </div>
+
       <div className="file-list">
         {files.map((f) => (
           <div key={f.id} className="file-row">
@@ -566,7 +688,7 @@ function FilesSection() {
               <div className="file-meta">{f.size} · {f.date}</div>
             </div>
             <div className="file-actions">
-              <button className="act-btn primary" onClick={() => showToast('Скачивание начато')}>⬇ Скачать</button>
+              <button className="act-btn primary" onClick={() => download(f)}>⬇ Скачать</button>
               <button className="act-btn danger" onClick={() => del(f.id)}>🗑</button>
             </div>
           </div>
@@ -660,10 +782,40 @@ function StatisticsSection() {
 }
 
 // ── SETTINGS ───────────────────────────────────────────
+const SETTINGS_KEY = 'studybuddy_settings';
+
 function SettingsSection() {
-  const [s, setS] = useState({ name: 'StudyBuddy', slogan: 'Найди своих по учёбе', regOpen: true, confirmAccounts: false, maxMentees: 5 });
+  const { users } = useApp();
+  const [s, setS] = useState(() => {
+    try { return { name: 'StudyBuddy', slogan: 'Найди своих по учёбе', regOpen: true, confirmAccounts: false, maxMentees: 5, ...JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}') }; }
+    catch { return { name: 'StudyBuddy', slogan: 'Найди своих по учёбе', regOpen: true, confirmAccounts: false, maxMentees: 5 }; }
+  });
   const [toast, showToast, clearToast] = useToast();
-  const upd = (k, v) => setS({ ...s, [k]: v });
+  // Сохраняем сразу при изменении — настройки реально применяются
+  const upd = (k, v) => {
+    const next = { ...s, [k]: v };
+    setS(next);
+    try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(next)); } catch { /* quota */ }
+  };
+
+  const backup = () => {
+    const rows = users.filter((u) => u.role !== 'admin').map((u) => ({
+      Логин: u.login,
+      Имя: u.fullName,
+      'Name (EN)': u.fullNameEn || '',
+      Институт: u.faculty,
+      Направление: u.direction,
+      Курс: u.course,
+      Возраст: u.age,
+      Роль: u.role,
+      Наставник: u.isMentor ? 'да' : 'нет',
+      Репутация: u.reputation,
+      Заблокирован: u.isBanned ? 'да' : 'нет',
+    }));
+    if (!rows.length) { showToast('Нет пользователей для экспорта'); return; }
+    exportToExcel(`studybuddy_users_${new Date().toISOString().slice(0, 10)}.csv`, rows);
+    showToast(`✅ Экспортировано ${rows.length} пользователей в Excel`);
+  };
 
   return (
     <>
@@ -691,15 +843,11 @@ function SettingsSection() {
             <div><div className="setting-label">Регистрация открыта</div><div className="setting-desc">Новые пользователи могут создавать аккаунты</div></div>
             <label className="switch"><input type="checkbox" checked={s.regOpen} onChange={(e) => upd('regOpen', e.target.checked)} /><span className="slider" /></label>
           </div>
-          <div className="setting-row">
-            <div><div className="setting-label">Подтверждение аккаунтов</div><div className="setting-desc">Требовать ручного подтверждения новых регистраций</div></div>
-            <label className="switch"><input type="checkbox" checked={s.confirmAccounts} onChange={(e) => upd('confirmAccounts', e.target.checked)} /><span className="slider" /></label>
-          </div>
         </div>
         <div className="admin-form-card" style={{ margin: 0 }}>
           <h3>Резервное копирование</h3>
           <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 14 }}>Создайте резервную копию всех данных платформы.</p>
-          <Button variant="secondary" onClick={() => showToast(`✅ Резервная копия создана: backup_${new Date().toISOString().slice(0,10)}.json`)}>💾 Создать резервную копию</Button>
+          <Button variant="primary" onClick={backup}>💾 Создать резервную копию</Button>
         </div>
         <Button variant="primary" size="lg" onClick={() => showToast('Настройки сохранены')}>Сохранить настройки</Button>
       </div>

@@ -1,18 +1,31 @@
 import { useState } from 'react';
+import { KGTU_FACULTIES } from '../../store/mockData';
 import './FilterPanel.css';
 
-const DIRECTIONS = ['IT', 'Дизайн', 'Экономика', 'Медицина', 'Право', 'Педагогика', 'Архитектура'];
-const COURSES = [1, 2, 3, 4, 5, 6];
+const COURSES = [1, 2, 3, 4, 5];
 
 export default function FilterPanel({ filters, setFilters }) {
   const [open, setOpen] = useState(false);
+
+  const toggleFaculty = (id) =>
+    setFilters((f) => ({
+      ...f,
+      faculties: (f.faculties || []).includes(id)
+        ? f.faculties.filter((x) => x !== id)
+        : [...(f.faculties || []), id],
+      directions: [],
+    }));
 
   const toggleDir = (d) =>
     setFilters((f) => ({ ...f, directions: f.directions.includes(d) ? f.directions.filter((x) => x !== d) : [...f.directions, d] }));
   const toggleCourse = (c) =>
     setFilters((f) => ({ ...f, courses: f.courses.includes(c) ? f.courses.filter((x) => x !== c) : [...f.courses, c] }));
 
-  const reset = () => setFilters({ directions: [], courses: [], ageFrom: '', ageTo: '', search: '', sparkOnly: false });
+  const reset = () => setFilters({ faculties: [], directions: [], courses: [], ageFrom: '', ageTo: '', search: '', sparkOnly: false });
+
+  const selectedFaculties = filters.faculties || [];
+  const selectedFacultyData = KGTU_FACULTIES.filter((f) => selectedFaculties.includes(f.id));
+  const directions = [...new Set(selectedFacultyData.flatMap((f) => f.directions))];
 
   return (
     <>
@@ -27,13 +40,25 @@ export default function FilterPanel({ filters, setFilters }) {
         </div>
 
         <div className="fp-section">
-          <label className="fp-label">Направление</label>
+          <label className="fp-label">Институт</label>
           <div className="fp-chips">
-            {DIRECTIONS.map((d) => (
-              <button key={d} className={`chip ${filters.directions.includes(d) ? 'active' : ''}`} onClick={() => toggleDir(d)}>{d}</button>
+            {KGTU_FACULTIES.map((f) => (
+              <button key={f.id} className={`chip ${selectedFaculties.includes(f.id) ? 'active' : ''}`}
+                onClick={() => toggleFaculty(f.id)}>{f.name}</button>
             ))}
           </div>
         </div>
+
+        {selectedFaculties.length > 0 && (
+          <div className="fp-section">
+            <label className="fp-label">Направление</label>
+            <div className="fp-chips">
+              {directions.map((d) => (
+                <button key={d} className={`chip ${filters.directions.includes(d) ? 'active' : ''}`} onClick={() => toggleDir(d)}>{d}</button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="fp-section">
           <label className="fp-label">Курс</label>
