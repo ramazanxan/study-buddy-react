@@ -58,9 +58,13 @@ export default function Chat() {
     return list;
   }, [conversations, currentUser.id, activeConvId]);
 
-  // set first conv as active if none selected
+  // Auto-select first conv on initial load only (not when user presses back)
+  const didAutoSelect = useRef(false);
   useEffect(() => {
-    if (!activeConvId && myConvs.length > 0) setActiveConvId(myConvs[0].id);
+    if (!didAutoSelect.current && !activeConvId && myConvs.length > 0) {
+      didAutoSelect.current = true;
+      setActiveConvId(myConvs[0].id);
+    }
   }, [myConvs, activeConvId]);
 
   useEffect(() => {
