@@ -205,8 +205,10 @@ function DashboardSection() {
 
 // ── ADD USER MODAL ─────────────────────────────────────
 function AddUserModal({ onAdd, onClose }) {
-  const [form, setForm] = useState({ login: '', fullName: '', faculty: '', course: 1, age: 18, password: 'pass123', role: 'student' });
+  const [form, setForm] = useState({ login: '', fullName: '', faculty: KGTU_FACULTIES[0].id, direction: KGTU_FACULTIES[0].directions[0], course: 1, age: 18, password: 'pass123', role: 'student' });
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+  const setFaculty = (id) => setForm((f) => ({ ...f, faculty: id, direction: KGTU_FACULTIES.find((x) => x.id === id)?.directions[0] || '' }));
+  const currentFaculty = KGTU_FACULTIES.find((f) => f.id === form.faculty) || KGTU_FACULTIES[0];
   const submit = () => {
     if (!form.login.trim() || !form.fullName.trim()) return;
     onAdd(form);
@@ -218,7 +220,18 @@ function AddUserModal({ onAdd, onClose }) {
         <h3 style={{ marginBottom: 16 }}>➕ Добавить пользователя</h3>
         <div className="form-group"><label className="label">Логин</label><input className="input" value={form.login} onChange={(e) => set('login', e.target.value)} placeholder="ivanov" /></div>
         <div className="form-group" style={{ marginTop: 10 }}><label className="label">ФИО</label><input className="input" value={form.fullName} onChange={(e) => set('fullName', e.target.value)} placeholder="Иван Иванов" /></div>
-        <div className="form-group" style={{ marginTop: 10 }}><label className="label">Институт</label><input className="input" value={form.faculty} onChange={(e) => set('faculty', e.target.value)} placeholder="ИИТ" /></div>
+        <div className="form-group" style={{ marginTop: 10 }}>
+          <label className="label">Институт</label>
+          <select className="input" value={form.faculty} onChange={(e) => setFaculty(e.target.value)}>
+            {KGTU_FACULTIES.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
+          </select>
+        </div>
+        <div className="form-group" style={{ marginTop: 10 }}>
+          <label className="label">Направление</label>
+          <select className="input" value={form.direction} onChange={(e) => set('direction', e.target.value)}>
+            {currentFaculty.directions.map((d) => <option key={d} value={d}>{d}</option>)}
+          </select>
+        </div>
         <div className="admin-form-row" style={{ marginTop: 10 }}>
           <div className="form-group"><label className="label">Курс</label><input className="input" type="number" min={1} max={5} value={form.course} onChange={(e) => set('course', e.target.value)} /></div>
           <div className="form-group"><label className="label">Возраст</label><input className="input" type="number" min={14} max={80} value={form.age} onChange={(e) => set('age', e.target.value)} /></div>
