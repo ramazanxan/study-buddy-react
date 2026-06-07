@@ -21,6 +21,25 @@ import ModeratorPanel from './pages/ModeratorPanel/ModeratorPanel';
 
 const KSTU_LOGO = 'https://enactus.kg/wp-content/uploads/2022/04/kgtu-logo.png';
 
+// Emojis flying out — one per faculty / topic
+const PARTICLES = [
+  { emoji: '💻', angle: 0,   dist: 130, dur: 4.2, delay: 0.0,  size: 22 },
+  { emoji: '📚', angle: 35,  dist: 150, dur: 3.8, delay: 1.1,  size: 20 },
+  { emoji: '⚙️', angle: 72,  dist: 140, dur: 4.6, delay: 2.3,  size: 22 },
+  { emoji: '🔬', angle: 108, dist: 155, dur: 3.5, delay: 0.7,  size: 20 },
+  { emoji: '📐', angle: 144, dist: 135, dur: 4.0, delay: 3.2,  size: 18 },
+  { emoji: '🏗️', angle: 180, dist: 145, dur: 3.9, delay: 1.8,  size: 20 },
+  { emoji: '⚡', angle: 216, dist: 160, dur: 4.4, delay: 0.4,  size: 22 },
+  { emoji: '🚗', angle: 252, dist: 130, dur: 3.7, delay: 2.6,  size: 18 },
+  { emoji: '🧮', angle: 288, dist: 150, dur: 4.1, delay: 1.4,  size: 20 },
+  { emoji: '🎓', angle: 324, dist: 165, dur: 3.6, delay: 0.9,  size: 22 },
+  { emoji: '🔭', angle: 54,  dist: 125, dur: 4.8, delay: 3.5,  size: 18 },
+  { emoji: '✏️', angle: 126, dist: 148, dur: 3.4, delay: 2.0,  size: 18 },
+  { emoji: '🏛️', angle: 198, dist: 138, dur: 4.3, delay: 1.6,  size: 18 },
+  { emoji: '🛠️', angle: 270, dist: 155, dur: 3.8, delay: 2.9,  size: 20 },
+  { emoji: '📡', angle: 342, dist: 142, dur: 4.5, delay: 0.5,  size: 18 },
+];
+
 function KstuWatermark() {
   const wrapRef = useRef(null);
 
@@ -30,8 +49,7 @@ function KstuWatermark() {
       if (raf) cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
         if (wrapRef.current) {
-          // Move `top` instead of transform so centering isn't broken
-          const offset = window.scrollY * 0.12;
+          const offset = window.scrollY * 0.10;
           wrapRef.current.style.top = `calc(50% + ${offset}px)`;
         }
       });
@@ -45,29 +63,20 @@ function KstuWatermark() {
       <style>{`
         @keyframes kstu-spin-float {
           0%   { transform: rotate(0deg)   translateY(0px);   }
-          25%  { transform: rotate(90deg)  translateY(-14px); }
+          25%  { transform: rotate(90deg)  translateY(-12px); }
           50%  { transform: rotate(180deg) translateY(0px);   }
-          75%  { transform: rotate(270deg) translateY(14px);  }
+          75%  { transform: rotate(270deg) translateY(12px);  }
           100% { transform: rotate(360deg) translateY(0px);   }
         }
-        @keyframes kstu-glow-pulse {
-          0%,100% {
-            filter:
-              drop-shadow(0 0 6px rgba(10,59,171,0.70))
-              drop-shadow(0 0 18px rgba(10,59,171,0.40))
-              saturate(1.4) contrast(1.1);
-          }
-          50% {
-            filter:
-              drop-shadow(0 0 16px rgba(10,59,171,1.0))
-              drop-shadow(0 0 40px rgba(10,59,171,0.65))
-              drop-shadow(0 0 70px rgba(26,92,232,0.35))
-              saturate(1.8) contrast(1.2) brightness(1.15);
-          }
+        @keyframes kstu-particle-fly {
+          0%   { transform: translate(0px, 0px) scale(0.2); opacity: 0; }
+          12%  { opacity: 1; }
+          70%  { opacity: 0.85; }
+          100% { transform: translate(var(--px), var(--py)) scale(0.7); opacity: 0; }
         }
       `}</style>
 
-      {/* Outer: fixed centering + scroll parallax via top */}
+      {/* Outer wrapper: centering + scroll parallax */}
       <div
         ref={wrapRef}
         aria-hidden="true"
@@ -76,33 +85,54 @@ function KstuWatermark() {
           left: '50%',
           top: '50%',
           transform: 'translate(-50%, -50%)',
-          width: 'min(52vmin, 480px)',
-          height: 'min(52vmin, 480px)',
+          width: 'min(50vmin, 460px)',
+          height: 'min(50vmin, 460px)',
           pointerEvents: 'none',
           zIndex: 1,
-          opacity: 0.22,
         }}
       >
-        {/* Inner: rotation + float — separate from translate centering */}
+        {/* Spinning logo */}
         <div style={{
-          width: '100%',
-          height: '100%',
-          animation: 'kstu-spin-float 14s linear infinite',
+          position: 'absolute',
+          inset: 0,
+          opacity: 0.18,
+          animation: 'kstu-spin-float 16s linear infinite',
           willChange: 'transform',
         }}>
-          {/* Image: only glow, no transform conflict */}
           <img
             src={KSTU_LOGO}
             alt=""
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain',
-              display: 'block',
-              animation: 'kstu-glow-pulse 3.5s ease-in-out infinite',
-            }}
+            style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
           />
         </div>
+
+        {/* Flying emoji particles from center */}
+        {PARTICLES.map((p, i) => {
+          const rad = p.angle * Math.PI / 180;
+          const px = Math.round(Math.cos(rad) * p.dist);
+          const py = Math.round(Math.sin(rad) * p.dist);
+          return (
+            <div
+              key={i}
+              style={{
+                position: 'absolute',
+                left: '50%',
+                top: '50%',
+                marginLeft: `-${p.size / 2}px`,
+                marginTop: `-${p.size / 2}px`,
+                fontSize: `${p.size}px`,
+                lineHeight: 1,
+                '--px': `${px}px`,
+                '--py': `${py}px`,
+                animation: `kstu-particle-fly ${p.dur}s ease-out ${p.delay}s infinite`,
+                willChange: 'transform, opacity',
+                opacity: 0,
+              }}
+            >
+              {p.emoji}
+            </div>
+          );
+        })}
       </div>
     </>
   );
