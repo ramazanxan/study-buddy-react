@@ -380,29 +380,33 @@
   .nav-theme-compact { display: flex; }
 }
 
-/* ── Mobile: notification dropdown full-width ── */
-@media (max-width: 600px) {
-  .nav-notif-wrap .nav-dropdown {
-    position: fixed;
-    top: var(--navbar-h);
-    left: 8px;
-    right: 8px;
-    width: auto;
-    max-height: 65vh;
-    overflow-y: auto;
-    border-radius: var(--radius-lg);
-    z-index: 900;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+/* ── Mobile dropdowns — fixed to viewport, never overflow ── */
+@media (max-width: 640px) {
+  /* Both dropdowns: break out of any positioned ancestor */
+  .nav-dropdown {
+    position: fixed !important;
+    top: var(--navbar-h) !important;
   }
-  .nav-notif-drop { width: 100%; }
 
-  /* User dropdown also full-width on mobile */
-  .nav-right > .nav-dropdown {
-    position: fixed;
-    top: var(--navbar-h);
-    right: 8px;
-    left: auto;
-    min-width: 220px;
+  /* Notification dropdown: full width */
+  .nav-notif-drop {
+    left: 8px !important;
+    right: 8px !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: 65vh !important;
+    overflow-y: auto !important;
+    border-radius: 16px !important;
+    z-index: 1000 !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18) !important;
+  }
+
+  /* Profile/avatar dropdown: right-aligned, limited width */
+  .nav-right .nav-dropdown:not(.nav-notif-drop) {
+    right: 8px !important;
+    left: auto !important;
+    width: min(240px, calc(100vw - 16px)) !important;
+    z-index: 1000 !important;
   }
 }
 

@@ -23,7 +23,9 @@
 .admin-nav-btn.active { background: rgba(255,95,87,0.1); color: var(--primary); font-weight: 600; }
 .admin-nav-btn .nav-icon { font-size: 18px; width: 22px; text-align: center; }
 
-.admin-main { flex: 1; padding: 32px; overflow-x: hidden; max-width: 100%; }
+/* admin-right wraps mobile tabs + main on all sizes */
+.admin-right { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+.admin-main  { flex: 1; padding: 32px; overflow-x: hidden; }
 .admin-section-title { font-family: var(--font-display); font-size: 22px; font-weight: 700; margin-bottom: 24px; }
 .admin-section-subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; }
 
@@ -248,23 +250,37 @@
   display: none; /* hidden on desktop */
 }
 
+/* ── Mobile tab bar — hidden on desktop ── */
+.admin-mobile-tabs { display: none; }
+
 /* ====== MOBILE ====== */
 @media (max-width: 768px) {
-  /* Hide sidebar completely on mobile */
+  /* Hide desktop sidebar */
   .admin-sidebar { display: none; }
-  .admin-sidebar-overlay { display: none; }
 
-  .admin-main { padding: 12px; }
+  /* admin-right becomes a full-width column */
+  .admin-right {
+    width: 100%;
+    height: calc(100vh - var(--navbar-h));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 
-  /* Horizontal scrollable tab bar */
+  /* Tab bar — always visible at top, no sticky tricks */
   .admin-mobile-tabs {
     display: flex;
     overflow-x: auto;
     gap: 8px;
-    padding-bottom: 12px;
-    margin-bottom: 16px;
+    padding: 10px 12px;
+    background: var(--bg-card);
+    border-bottom: 2px solid var(--border);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    position: sticky;
+    top: 0;           /* sticky within admin-right scroll container */
+    z-index: 50;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    flex-shrink: 0;
   }
   .admin-mobile-tabs::-webkit-scrollbar { display: none; }
 
@@ -274,30 +290,28 @@
     align-items: center;
     gap: 3px;
     padding: 8px 14px;
-    border-radius: 14px;
+    border-radius: 12px;
     border: 1.5px solid var(--border);
-    background: var(--bg-card);
+    background: var(--bg-muted);
     color: var(--text-muted);
     font-family: var(--font-body);
     cursor: pointer;
     white-space: nowrap;
     flex-shrink: 0;
     transition: all 0.18s ease;
+    -webkit-tap-highlight-color: transparent;
   }
-  .amt-icon { font-size: 20px; line-height: 1; }
+  .amt-icon  { font-size: 18px; line-height: 1; }
   .amt-label { font-size: 11px; font-weight: 600; }
 
-  .admin-mobile-tab:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-  }
   .admin-mobile-tab.active {
     background: var(--primary);
     border-color: var(--primary);
     color: #fff;
-    box-shadow: 0 4px 12px rgba(93,187,42,0.30);
+    box-shadow: 0 3px 10px rgba(93,187,42,0.30);
   }
 
+  .admin-main { padding: 14px; }
   .admin-stat-grid { grid-template-columns: 1fr 1fr; }
   .dash-cols { grid-template-columns: 1fr; }
   .stat-panels { grid-template-columns: 1fr; }

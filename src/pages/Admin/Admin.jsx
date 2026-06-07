@@ -72,18 +72,13 @@ export default function Admin() {
 
   return (
     <div className="admin-page">
-      {/* Sidebar overlay for mobile */}
-      {sidebarOpen && (
-        <div className="admin-sidebar-overlay" onClick={() => setSidebarOpen(false)} />
-      )}
-
-      {/* Sidebar */}
-      <aside className={`admin-sidebar${sidebarOpen ? ' sidebar-open' : ''}`}>
+      {/* Sidebar — desktop */}
+      <aside className="admin-sidebar">
         {NAV.map((g) => (
           <div key={g.section} className="admin-sidebar-group">
             <span className="admin-sidebar-group-label">{g.section}</span>
             {g.items.map((item) => (
-              <button key={item.key} className={`admin-nav-btn ${section === item.key ? 'active' : ''}`} onClick={() => { setSection(item.key); setSidebarOpen(false); }}>
+              <button key={item.key} className={`admin-nav-btn ${section === item.key ? 'active' : ''}`} onClick={() => setSection(item.key)}>
                 <span className="nav-icon">{item.icon}</span> {item.label}
               </button>
             ))}
@@ -91,9 +86,9 @@ export default function Admin() {
         ))}
       </aside>
 
-      {/* Main */}
-      <main className="admin-main">
-        {/* Mobile horizontal tab bar */}
+      {/* RIGHT side: mobile tabs + content */}
+      <div className="admin-right">
+        {/* Mobile horizontal tab bar — sticky at top of admin-right */}
         <div className="admin-mobile-tabs">
           {NAV.flatMap((g) => g.items).map((item) => (
             <button
@@ -107,6 +102,9 @@ export default function Admin() {
           ))}
         </div>
 
+        {/* Main content */}
+        <main className="admin-main">
+
         {section === 'dashboard'         && <DashboardSection />}
         {section === 'students'          && <StudentsSection />}
         {section === 'mentors'           && <MentorsSection />}
@@ -118,7 +116,8 @@ export default function Admin() {
         {section === 'files'             && <FilesSection />}
         {section === 'statistics'        && <StatisticsSection />}
         {section === 'settings'          && <SettingsSection />}
-      </main>
+        </main>
+      </div>
     </div>
   );
 }
