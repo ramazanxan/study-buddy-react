@@ -154,8 +154,11 @@ export default function Register() {
       else navigate('/feed');
 
     } catch (err) {
-      setServerError('Ошибка соединения: ' + (err?.message || 'попробуйте ещё раз'));
+      // Supabase недоступен — регистрируем локально
+      const res = register({ ...form, direction, role: userRole });
       setLoading(false);
+      if (res.error) setServerError(res.error);
+      else navigate('/feed');
     }
   };
 
