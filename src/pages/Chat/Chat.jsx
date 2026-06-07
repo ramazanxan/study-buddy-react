@@ -65,9 +65,10 @@ export default function Chat() {
     if (activeConvId) markRead(activeConvId);
   }, [activeConvId, markRead]);
 
+  const threadLen = thread.length;
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, activeConvId]);
+    endRef.current?.scrollIntoView({ behavior: 'auto' });
+  }, [threadLen, activeConvId]);
 
   const activeConv = useMemo(
     () => conversations.find((c) => c.id === activeConvId),
