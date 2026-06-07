@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../../store/AppContext';
 import { KGTU_FACULTIES } from '../../store/mockData';
 import Button from '../../components/common/Button';
+import { supabase } from '../../lib/supabase';
 import {
   validateLogin, validatePassword, validateName, validateAge,
   getPasswordStrength, passwordCriteria,
@@ -12,6 +13,9 @@ import './Auth.css';
 const CRITERIA_LABELS = [
   ['length', '8+ символов'], ['upper', 'Заглавная'], ['lower', 'Строчная'], ['digit', 'Цифра'],
 ];
+
+// Auto-generate email from login so users don't need to enter one
+const loginToEmail = (login) => `${login.toLowerCase()}@studybuddy.kg`;
 
 export default function Register() {
   const { register } = useApp();
@@ -47,22 +51,89 @@ export default function Register() {
     return Object.keys(e).length === 0;
   };
 
-  const submit = (ev) => {
+  const submit = async (ev) => {
     ev.preventDefault();
     setServerError('');
     if (!validate()) return;
     setLoading(true);
-    setTimeout(() => {
-      const data = {
-        ...form,
-        direction: form.direction || currentFaculty.directions[0],
-        role: role === 'mentor' ? 'mentor' : 'student',
-      };
-      const res = register(data);
+
+    const direction = form.direction || currentFaculty.directions[0];
+    const userRole  = role === 'mentor' ? 'mentor' : 'student';
+
+    try {
+      if (supabase) {
+        const email = loginToEmail(form.login);
+
+        // 1. Create Supabase auth user
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password: form.password,
+          options: {
+            data: {
+              login:      form.login,
+              full_name:  form.fullName,
+              faculty:    form.faculty,
+              direction,
+              group_name: '—',
+              course:     Number(form.course) || 1,
+              age:        Number(form.age),
+              about:      form.about || '',
+              role:       userRole,
+              is_mentor:  role === 'mentor',
+            },
+          },
+        });
+
+        if (error) {
+          if (error.message.includes('already registered') || error.message.includes('already exists')) {
+            setServerError('Этот логин уже занят. Выбери другой.');
+          } else {
+            setServerError(error.message);
+          }
+          setLoading(false);
+          return;
+        }
+
+        // 2. Insert profile into shared profiles table
+        if (data.user) {
+          await supabase.from('profiles').upsert({
+            id:        data.user.id,
+            login:     form.login,
+            full_name: form.fullName,
+            faculty:   form.faculty,
+            direction,
+            group_name: '—',
+            course:    Number(form.course) || 1,
+            age:       Number(form.age),
+            about:     form.about || '',
+            role:      userRole,
+            is_mentor: role === 'mentor',
+          }, { onConflict: 'id' });
+        }
+
+        // 3. Immediately sign in (works when email confirmation is OFF in Supabase)
+        const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password: form.password });
+
+        setLoading(false);
+        if (!signInErr) {
+          navigate('/feed');
+        } else {
+          setServerError('Аккаунт создан! Войди с логином и паролем.');
+          navigate('/login');
+        }
+        return;
+      }
+
+      // ── Fallback: mock store (no Supabase) ──
+      const res = register({ ...form, direction, role: userRole });
       setLoading(false);
       if (res.error) setServerError(res.error);
       else navigate('/feed');
-    }, 350);
+
+    } catch (err) {
+      setServerError('Ошибка соединения. Попробуйте ещё раз.');
+      setLoading(false);
+    }
   };
 
   return (

@@ -243,20 +243,72 @@
 
 .cac-text { font-size: 13px; color: var(--text-muted); font-style: italic; }
 
+/* ====== MOBILE HORIZONTAL TAB BAR ====== */
+.admin-mobile-tabs {
+  display: none; /* hidden on desktop */
+}
+
 /* ====== MOBILE ====== */
-@media (max-width: 900px) {
-  .admin-page { flex-direction: column; }
-  .admin-sidebar { width: 100%; min-width: 0; height: auto; position: static; flex-direction: row; overflow-x: auto; padding: 8px 12px; border-right: none; border-bottom: 1px solid var(--border); flex-wrap: nowrap; gap: 0; }
-  .admin-sidebar-group { display: flex; gap: 4px; padding: 0; margin: 0; }
-  .admin-sidebar-group-label { display: none; }
-  .admin-nav-btn { padding: 7px 12px; font-size: 12px; white-space: nowrap; }
-  .admin-main { padding: 16px; }
+@media (max-width: 768px) {
+  /* Hide sidebar completely on mobile */
+  .admin-sidebar { display: none; }
+  .admin-sidebar-overlay { display: none; }
+
+  .admin-main { padding: 12px; }
+
+  /* Horizontal scrollable tab bar */
+  .admin-mobile-tabs {
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .admin-mobile-tabs::-webkit-scrollbar { display: none; }
+
+  .admin-mobile-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 8px 14px;
+    border-radius: 14px;
+    border: 1.5px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-muted);
+    font-family: var(--font-body);
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: all 0.18s ease;
+  }
+  .amt-icon { font-size: 20px; line-height: 1; }
+  .amt-label { font-size: 11px; font-weight: 600; }
+
+  .admin-mobile-tab:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+  .admin-mobile-tab.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(93,187,42,0.30);
+  }
+
   .admin-stat-grid { grid-template-columns: 1fr 1fr; }
   .dash-cols { grid-template-columns: 1fr; }
   .stat-panels { grid-template-columns: 1fr; }
   .admin-form-row { grid-template-columns: 1fr; }
   .admin-form-row.triple { grid-template-columns: 1fr; }
+  .admin-table-wrap { overflow-x: auto; }
 }
+
 @media (max-width: 500px) {
   .admin-stat-grid { grid-template-columns: 1fr; }
+  .admin-mobile-tab { padding: 7px 11px; }
+  .amt-icon { font-size: 18px; }
+  .amt-label { font-size: 10px; }
 }

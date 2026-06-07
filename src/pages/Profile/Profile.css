@@ -35,5 +35,6 @@
 
 @media (max-width: 680px) {
   .profile-cols { grid-template-columns: 1fr; }
-  .profile-stats { gap: 24px; }
+  .profile-stats { gap: 24px; flex-wrap: wrap; justify-content: center; }
+  .profile-pills { flex-wrap: wrap; }
 }

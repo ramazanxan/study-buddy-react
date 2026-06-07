@@ -360,6 +360,52 @@
   border-radius: 2px;
 }
 
+/* Compact icon-only theme button — mobile only */
+.nav-theme-compact {
+  display: none;
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-muted);
+  font-size: 16px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: border-color var(--transition);
+}
+.nav-theme-compact:hover { border-color: var(--primary); }
+
+@media (max-width: 640px) {
+  .nav-theme-pill { display: none; }
+  .nav-theme-compact { display: flex; }
+}
+
+/* ── Mobile: notification dropdown full-width ── */
+@media (max-width: 600px) {
+  .nav-notif-wrap .nav-dropdown {
+    position: fixed;
+    top: var(--navbar-h);
+    left: 8px;
+    right: 8px;
+    width: auto;
+    max-height: 65vh;
+    overflow-y: auto;
+    border-radius: var(--radius-lg);
+    z-index: 900;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  }
+  .nav-notif-drop { width: 100%; }
+
+  /* User dropdown also full-width on mobile */
+  .nav-right > .nav-dropdown {
+    position: fixed;
+    top: var(--navbar-h);
+    right: 8px;
+    left: auto;
+    min-width: 220px;
+  }
+}
+
 @media (max-width: 900px) {
   .nav-burger { display: flex; }
   .nav-right { margin-left: 0; }

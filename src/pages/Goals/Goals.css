@@ -44,6 +44,15 @@
 
 .add-form .input { flex: 1; min-width: 200px; }
 
+@media (max-width: 600px) {
+  .add-form { flex-direction: column; }
+  .add-form .input { min-width: 0; width: 100%; }
+  .dl-stats { flex-wrap: wrap; }
+  .goal-grid { grid-template-columns: 1fr; }
+  .pact-grid { grid-template-columns: 1fr; }
+  .callme-grid { grid-template-columns: 1fr; }
+}
+
 /* Goals */
 .goal-grid {
   display: grid;

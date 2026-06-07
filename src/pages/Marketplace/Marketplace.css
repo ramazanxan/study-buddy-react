@@ -443,6 +443,15 @@
   flex-shrink: 0;
 }
 
+@media (max-width: 600px) {
+  .market-tools { flex-wrap: wrap; }
+  .market-search { max-width: 100%; width: 100%; }
+  .market-sort { max-width: 100%; width: 100%; }
+  .field-row { grid-template-columns: 1fr; }
+  .market-hero { flex-direction: column; align-items: flex-start; }
+  .market-grid { grid-template-columns: 1fr; }
+}
+
 .toast {
   position: fixed;
   bottom: 24px;

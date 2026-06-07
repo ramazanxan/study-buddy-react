@@ -68,16 +68,22 @@ export default function Admin() {
   if (!currentUser || currentUser.role !== 'admin') return <Navigate to="/feed" replace />;
 
   const [section, setSection] = useState('dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="admin-page">
+      {/* Sidebar overlay for mobile */}
+      {sidebarOpen && (
+        <div className="admin-sidebar-overlay" onClick={() => setSidebarOpen(false)} />
+      )}
+
       {/* Sidebar */}
-      <aside className="admin-sidebar">
+      <aside className={`admin-sidebar${sidebarOpen ? ' sidebar-open' : ''}`}>
         {NAV.map((g) => (
           <div key={g.section} className="admin-sidebar-group">
             <span className="admin-sidebar-group-label">{g.section}</span>
             {g.items.map((item) => (
-              <button key={item.key} className={`admin-nav-btn ${section === item.key ? 'active' : ''}`} onClick={() => setSection(item.key)}>
+              <button key={item.key} className={`admin-nav-btn ${section === item.key ? 'active' : ''}`} onClick={() => { setSection(item.key); setSidebarOpen(false); }}>
                 <span className="nav-icon">{item.icon}</span> {item.label}
               </button>
             ))}
@@ -87,6 +93,20 @@ export default function Admin() {
 
       {/* Main */}
       <main className="admin-main">
+        {/* Mobile horizontal tab bar */}
+        <div className="admin-mobile-tabs">
+          {NAV.flatMap((g) => g.items).map((item) => (
+            <button
+              key={item.key}
+              className={`admin-mobile-tab ${section === item.key ? 'active' : ''}`}
+              onClick={() => setSection(item.key)}
+            >
+              <span className="amt-icon">{item.icon}</span>
+              <span className="amt-label">{item.label}</span>
+            </button>
+          ))}
+        </div>
+
         {section === 'dashboard'         && <DashboardSection />}
         {section === 'students'          && <StudentsSection />}
         {section === 'mentors'           && <MentorsSection />}

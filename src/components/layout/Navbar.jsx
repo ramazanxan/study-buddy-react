@@ -165,6 +165,13 @@ export default function Navbar({ theme, onToggleTheme }) {
             <span className={`pill-opt ${theme !== 'dark' ? 'pill-active' : ''}`}>☀️ Светлая</span>
             <span className={`pill-opt ${theme === 'dark' ? 'pill-active' : ''}`}>🌙 Тёмная</span>
           </button>
+          <button
+            className="nav-theme-compact"
+            onClick={onToggleTheme}
+            aria-label="Переключить тему"
+          >
+            {theme === 'dark' ? '🌙' : '☀️'}
+          </button>
           {role !== 'admin' && (
             <NavLink to="/complaints" className="nav-complaint-btn" title="Пожаловаться" onClick={() => setMenuOpen(false)}>
               🚩

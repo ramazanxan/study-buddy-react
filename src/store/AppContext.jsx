@@ -46,6 +46,16 @@ function reducer(state, action) {
     case 'ADD_USER':
       return { ...state, users: [...state.users, action.user] };
 
+    case 'MERGE_SUPABASE_USERS': {
+      const merged = [...state.users];
+      for (const sb of action.users) {
+        const idx = merged.findIndex((u) => u.id === sb.id || u.login === sb.login);
+        if (idx === -1) merged.push(sb);
+        else merged[idx] = { ...merged[idx], ...sb };
+      }
+      return { ...state, users: merged };
+    }
+
     case 'UPDATE_USER': {
       const users = state.users.map((u) => (u.id === action.user.id ? action.user : u));
       const currentUser = state.currentUser?.id === action.user.id ? action.user : state.currentUser;
@@ -216,9 +226,36 @@ export function AppProvider({ children }) {
   useEffect(() => {
     if (!supabase) return;
 
-    // Immediately restore session on page load (covers email-confirmation redirects)
+    // Immediately restore session on page load
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) dispatch({ type: 'SET_CURRENT_USER', user: buildSupabaseUser(session.user) });
+    });
+
+    // Fetch all profiles from Supabase so admin can see all users
+    supabase.from('profiles').select('*').then(({ data: profiles }) => {
+      if (!profiles) return;
+      const sbUsers = profiles.map((p) => ({
+        id:         p.id,
+        login:      p.login,
+        fullName:   p.full_name || '',
+        faculty:    p.faculty || '',
+        direction:  p.direction || '',
+        groupName:  p.group_name || '—',
+        course:     p.course || 1,
+        age:        p.age || 0,
+        about:      p.about || '',
+        role:       p.role || 'student',
+        isMentor:   p.is_mentor || false,
+        photo:      p.photo || null,
+        interests:  [],
+        reputation: p.reputation || 0,
+        badges:     p.badges || [],
+        isBanned:   p.is_banned || false,
+        createdAt:  p.created_at,
+        lastSeen:   p.created_at,
+        passwordHash: '', // Supabase users have no local hash
+      }));
+      dispatch({ type: 'MERGE_SUPABASE_USERS', users: sbUsers });
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {

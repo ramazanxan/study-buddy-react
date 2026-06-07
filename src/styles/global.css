@@ -35,6 +35,11 @@ h1, h2, h3, h4, h5 { font-family: var(--font-display); font-weight: 700; line-he
 /* App page wrapper (below navbar) */
 .page { padding-top: calc(var(--navbar-h) + 20px); padding-bottom: 60px; min-height: 100vh; }
 
+@media (max-width: 640px) {
+  .container { padding: 0 16px; }
+  .page { padding-top: calc(var(--navbar-h) + 12px); }
+}
+
 /* ===== Cards ===== */
 .card {
   background: var(--bg-card);
