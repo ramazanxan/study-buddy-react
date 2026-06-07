@@ -2,6 +2,7 @@ import { useState, useMemo, useRef } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { useApp } from '../../store/AppContext';
+import { KGTU_FACULTIES } from '../../store/mockData';
 import Avatar from '../../components/common/Avatar';
 import Button from '../../components/common/Button';
 import { formatDate, truncate } from '../../utils/helpers';
