@@ -1,41 +1,41 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useRef, useEffect } from 'react';
 import { AppProvider, useApp } from './store/AppContext';
 import { useTheme } from './hooks/useTheme';
 
 const KSTU_LOGO = 'https://enactus.kg/wp-content/uploads/2022/04/kgtu-logo.png';
 
 function KstuWatermark() {
-  const ref = useRef(null);
-  useEffect(() => {
-    let raf = null;
-    const onScroll = () => {
-      if (raf) cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        if (ref.current) ref.current.style.transform = `translate(-50%, calc(-50% + ${window.scrollY * 0.10}px))`;
-      });
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => { window.removeEventListener('scroll', onScroll); if (raf) cancelAnimationFrame(raf); };
-  }, []);
   return (
-    <div ref={ref} aria-hidden="true" style={{
-      position: 'fixed', left: '50%', top: '50%',
-      transform: 'translate(-50%, -50%)',
-      width: 'min(50vmin, 440px)', height: 'min(50vmin, 440px)',
-      opacity: 0.10, pointerEvents: 'none', zIndex: 0,
-      animation: 'kstu-wm-float 5s ease-in-out infinite',
-    }}>
+    <>
       <style>{`
-        @keyframes kstu-wm-float {
-          0%,100% { margin-top: 0; }
-          50%      { margin-top: -14px; }
+        @keyframes kstu-float {
+          0%   { transform: translate(-50%, -50%) translateY(0px);    }
+          50%  { transform: translate(-50%, -50%) translateY(-18px);  }
+          100% { transform: translate(-50%, -50%) translateY(0px);    }
         }
       `}</style>
-      <img src={KSTU_LOGO} alt=""
-        style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
-      />
-    </div>
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'fixed',
+          left: '50%',
+          top: '50%',
+          width: 'clamp(180px, 40vmin, 420px)',
+          height: 'clamp(180px, 40vmin, 420px)',
+          opacity: 0.09,
+          pointerEvents: 'none',
+          zIndex: 0,
+          willChange: 'transform',
+          animation: 'kstu-float 6s ease-in-out infinite',
+        }}
+      >
+        <img
+          src={KSTU_LOGO}
+          alt=""
+          style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+        />
+      </div>
+    </>
   );
 }
 import Navbar from './components/layout/Navbar';
